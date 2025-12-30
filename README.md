@@ -5,7 +5,7 @@ This repository contains a Java Swing–based Seminar Management System develope
 
 The application follows object-oriented design principles, with clear separation between model, controller, and user interface layers, and includes comprehensive UML documentation (class and sequence diagrams) to ensure strong design coherence between analysis and implementation.
 
-##Key Features
+## Key Features
 
 - Role-based user management for Students, Evaluators, and Coordinators
 
@@ -19,7 +19,7 @@ The application follows object-oriented design principles, with clear separation
 
 - Award computation for Best Oral, Best Poster, and People’s Choice
 
-##Technical Highlights
+## Technical Highlights
 
 - Implemented using Java Swing (standalone desktop application)
 
@@ -29,7 +29,7 @@ The application follows object-oriented design principles, with clear separation
 
 - Modular, extensible architecture suitable for future enhancements
 
-##Academic Context
+## Academic Context
 
 - This project is developed as a group-based OOAD exercise, emphasizing:
 
