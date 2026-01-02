@@ -15,8 +15,21 @@ public class main {
 
         cardLayout = new CardLayout();
         mainPanel = new JPanel(cardLayout);
+        
+        //Coordinator 
+        JPanel coordinatorLayout = new JPanel(new BorderLayout());
+        JPanel seminarManagement = new JPanel();
+        JPanel scheduleManagement = new JPanel();
+        JPanel assignManagement = new JPanel();
 
-        frame.add(mainPanel);
+        JTabbedPane coordinatorTabs = new JTabbedPane();
+        coordinatorTabs.addTab("Seminar",seminarManagement);
+        coordinatorTabs.addTab("Schedule",scheduleManagement);
+        coordinatorTabs.addTab("Assign",assignManagement);
+        coordinatorLayout.add(coordinatorTabs,BorderLayout.CENTER);
+
+        //final setup
+        frame.add(coordinatorLayout);
         frame.setVisible(true);
     }
 
