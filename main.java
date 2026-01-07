@@ -6,6 +6,11 @@ public class main {
             DBHelper.initDatabase(); 
             LoginFrame lf = new LoginFrame(); // open login frame
             lf.setVisible(true);
+
+                        
+            // DEV MODE (Switch to any panel name to open it)
+            // lf.showPanel("CoordinatorPanel");  // open coordinator panel
+
         });
     }
 }
