@@ -10,11 +10,12 @@ public class ScheduleFrame extends JFrame{
         super("Postgraduate Academic Research Seminar");
         setSize(600, 400);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setLayout(new BorderLayout());
         
-        //mainPanel for this one
+        //schedulePanel is the main panel
         JPanel schedulePanel = new JPanel(new BorderLayout());
-
-        //TRY TABLE
+        
+        //DATA FOR SCHEDULE (all schedule use this same data)
         String[] columns = {"Time", "Event", "Person"};
         Object[][] data = {
             {"09:00 AM", "Math Class", "Alice"},
@@ -22,32 +23,17 @@ public class ScheduleFrame extends JFrame{
             {"11:00 AM", "Meeting", "Admin"}
         };
 
-        
-
-        //
-
-
-        //============
         //Store for date info
         ArrayList<String> dateList = new ArrayList<>();
-
         dateList.add("12 Dec 2025");
         dateList.add("1 Jan 2026");
         dateList.add("15 Jan 2026");
-        //=============
 
-        //============
-        //Store for date info
+        //Store for venue info
         ArrayList<String> venueList = new ArrayList<>();
-
         venueList.add("CQCR1004");
         venueList.add("CNMX0001");
         venueList.add("CNMX0003");
-        //=============
-        
-        //session type 
-        // JLabel sTypeText = new JLabel("Oral");
-        // sTypeText.setBounds(140, 70, 150, 25);
 
         int sessionList = 3;
         int tabsList = sessionList;
@@ -81,11 +67,14 @@ public class ScheduleFrame extends JFrame{
             sessionTypeLabel.setBounds(40, 50, 120, 25);
             panel.add(sessionTypeLabel);
 
-            JTable j = new JTable(data, columns);
-            j.setBounds(30, 40, 200, 300);
+            JLabel sessionTypeText = new JLabel("Oral");
+            sessionTypeText.setBounds(130, 50, 150, 25);
+            panel.add(sessionTypeText);
 
-            JScrollPane sp = new JScrollPane(j);
-            panel.add(sp);
+            JTable scheduleTable = new JTable(data, columns);
+            JScrollPane schedulePane = new JScrollPane(scheduleTable);
+            schedulePane.setBounds(30, 90, 520, 180);
+            panel.add(schedulePane);
 
             //==========
 
