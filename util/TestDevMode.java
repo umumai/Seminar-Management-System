@@ -8,6 +8,7 @@ import javax.swing.JPanel;
 import models.User;
 import ui.LoginFrame;
 import ui.StudentPanel;
+import ui.CoordinatorPanel;
 import ui.EvaluatorPanel;
 
 public class TestDevMode {
@@ -28,7 +29,7 @@ public class TestDevMode {
         
         // Test Student Button 
         studentBtn.addActionListener(e -> {
-            User testUser = new User("STU001", "Test Student", "STUDENT");
+            User testUser = new User("STU001", "Test Student", "STUDENT", "");
             StudentPanel.setUser(testUser);
             if (parent instanceof LoginFrame) {
                 ((LoginFrame) parent).showPanel("StudentPanel");
@@ -37,7 +38,7 @@ public class TestDevMode {
         
         // Test Evaluator Button 
         evaluatorBtn.addActionListener(e -> {
-            User testUser = new User("EVA001", "Test Evaluator", "EVALUATOR");
+            User testUser = new User("EVA001", "Test Evaluator", "EVALUATOR", "");
             EvaluatorPanel.setUser(testUser);
             if (parent instanceof LoginFrame) {
                 ((LoginFrame) parent).showPanel("EvaluatorPanel");
@@ -46,6 +47,8 @@ public class TestDevMode {
         
         // Test Coordinator Button
         coordinatorBtn.addActionListener(e -> {
+            User testUser = new User("COO001", "Test Coordinator", "COORDINATOR", "");
+            CoordinatorPanel.setUser(testUser);
             if (parent instanceof LoginFrame) {
                 ((LoginFrame) parent).showPanel("CoordinatorPanel");
             }

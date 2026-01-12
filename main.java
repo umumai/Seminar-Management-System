@@ -6,7 +6,7 @@ import ui.LoginFrame;
 public class main {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> { // ensure GUI is created on the EDT 
-            DBHelper.initDatabase(); 
+            DBHelper.authenticate(null, null);
             LoginFrame lf = new LoginFrame(); // open login frame
             lf.setVisible(true);
 
@@ -18,3 +18,19 @@ public class main {
     }
 }
 
+// import javax.swing.SwingUtilities;
+
+// public class main {
+//     public static void main(String[] args) {
+
+//         SwingUtilities.invokeLater(() -> {
+
+//             // Auto-create default users if database is empty
+//             DBHelper.seedUsersIfEmpty();
+
+//             // Open login frame
+//             LoginFrame lf = new LoginFrame();
+//             lf.setVisible(true);
+//         });
+//     }
+// }

@@ -17,7 +17,7 @@ import database.DBHelper;
 import util.TestDevMode;
 
 public class LoginFrame extends JFrame {
-    private final JTextField idField = new JTextField(12);
+    private final JTextField nameField = new JTextField(12);
     private final JPasswordField passField = new JPasswordField(12);
     private final CardLayout cardLayout;
     private final JPanel mainPanel;
@@ -60,7 +60,7 @@ public class LoginFrame extends JFrame {
         GridBagConstraints c = new GridBagConstraints();
         c.insets = new Insets(4,4,4,4);
         c.gridx = 0; c.gridy = 0; p.add(new JLabel("ID:"), c);
-        c.gridx = 1; p.add(idField, c);
+        c.gridx = 1; p.add(nameField, c);
         c.gridx = 0; c.gridy = 1; p.add(new JLabel("Password:"), c);
         c.gridx = 1; p.add(passField, c);
 
@@ -91,7 +91,7 @@ public class LoginFrame extends JFrame {
     }
 
     private void doLogin() {
-        String id = idField.getText().trim();
+        String id = nameField.getText().trim();
         String pass = new String(passField.getPassword());
         if (id.isEmpty() || pass.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Enter ID and password");
