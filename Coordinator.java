@@ -1,7 +1,7 @@
 public class Coordinator extends User {
     
     public Coordinator(String id, String name){
-        super(id, name, "Coordinator");
+        super(id, name, "Coordinator", "");
     }
 
     public void createSession(Session session){

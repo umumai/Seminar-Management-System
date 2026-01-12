@@ -46,19 +46,26 @@ public class DBHelper {
     }
 
     public static User authenticate(String id, String password) {
-        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement("SELECT id,name,role FROM users WHERE id = ? AND password = ?")) {
-            ps.setString(1, id);
-            ps.setString(2, password);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return new User(rs.getString("id"), rs.getString("name"), rs.getString("role"));
-                }
+    String sql = "SELECT id, name, role FROM users WHERE id = ? AND password = ?";
+    try (Connection conn = getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+
+        ps.setString(1, id);
+        ps.setString(2, password);
+
+        try (ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                String name = rs.getString("name");
+                String role = rs.getString("role");
+                return new User(id, name, role, password); // Use 4-parameter constructor
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
-        return null;
+
+    } catch (SQLException e) {
+        e.printStackTrace();
     }
+    return null;
+}
 
     public static String createStudent(String name, String password) throws SQLException {
         try (Connection conn = getConnection(); Statement st = conn.createStatement()) {
@@ -85,5 +92,4 @@ public class DBHelper {
         }
     }
 } 
-    
 

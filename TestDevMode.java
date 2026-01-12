@@ -1,6 +1,7 @@
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+
 import java.awt.FlowLayout;
 
 public class TestDevMode {
@@ -21,7 +22,7 @@ public class TestDevMode {
         
         // Test Student Button 
         studentBtn.addActionListener(e -> {
-            User testUser = new User("STU001", "Test Student", "STUDENT");
+            User testUser = new User("STU001", "Test Student", "STUDENT", "student1");
             DashboardFrame df = new DashboardFrame(testUser, 1);
             df.setVisible(true);
             parent.dispose();
@@ -29,7 +30,7 @@ public class TestDevMode {
         
         // Test Evaluator Button 
         evaluatorBtn.addActionListener(e -> {
-            User testUser = new User("EVA001", "Test Evaluator", "EVALUATOR");
+            User testUser = new User("EVA001", "Test Evaluator", "EVALUATOR", "evaluator1");
             DashboardFrame df = new DashboardFrame(testUser, 2);
             df.setVisible(true);
             parent.dispose();
