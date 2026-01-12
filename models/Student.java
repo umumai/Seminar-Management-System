@@ -1,3 +1,5 @@
+package models;
+
 public class Student extends User {
     private String supervisorName;
     private String researchTitle;

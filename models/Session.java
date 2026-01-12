@@ -1,3 +1,4 @@
+package models;
 public class Session {
     private String sessionID;
     private String date;

@@ -1,3 +1,4 @@
+package models;
 public class Award {
     private String awardType;
     private Student winner;

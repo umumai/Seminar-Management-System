@@ -1,6 +1,10 @@
+package ui;
+
 import java.awt.*;
 import java.util.ArrayList;
 import javax.swing.*;
+
+import util.GUI;
 
 public class ScheduleFrame extends JFrame{
 

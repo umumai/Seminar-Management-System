@@ -1,7 +1,14 @@
+package util;
+
+import java.awt.FlowLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import java.awt.FlowLayout;
+
+import models.User;
+import ui.LoginFrame;
+import ui.StudentPanel;
+import ui.EvaluatorPanel;
 
 public class TestDevMode {
     
@@ -10,7 +17,7 @@ public class TestDevMode {
         JPanel devPanel = new JPanel();
         
         // DEV MODE: Label
-        JLabel devLabel = new JLabel("Development Mode");
+        JLabel devLabel = new JLabel("DEV MODE");
         devLabel.setFont(devLabel.getFont().deriveFont(java.awt.Font.ITALIC, 10f));
         
         // Button Panel
@@ -22,24 +29,26 @@ public class TestDevMode {
         // Test Student Button 
         studentBtn.addActionListener(e -> {
             User testUser = new User("STU001", "Test Student", "STUDENT");
-            DashboardFrame df = new DashboardFrame(testUser, 1);
-            df.setVisible(true);
-            parent.dispose();
+            StudentPanel.setUser(testUser);
+            if (parent instanceof LoginFrame) {
+                ((LoginFrame) parent).showPanel("StudentPanel");
+            }
         });
         
         // Test Evaluator Button 
         evaluatorBtn.addActionListener(e -> {
             User testUser = new User("EVA001", "Test Evaluator", "EVALUATOR");
-            DashboardFrame df = new DashboardFrame(testUser, 2);
-            df.setVisible(true);
-            parent.dispose();
+            EvaluatorPanel.setUser(testUser);
+            if (parent instanceof LoginFrame) {
+                ((LoginFrame) parent).showPanel("EvaluatorPanel");
+            }
         });
         
         // Test Coordinator Button
         coordinatorBtn.addActionListener(e -> {
-            CoordinatorFrame cf = new CoordinatorFrame();
-            cf.setVisible(true);
-            parent.dispose();
+            if (parent instanceof LoginFrame) {
+                ((LoginFrame) parent).showPanel("CoordinatorPanel");
+            }
         });
         
         devButtons.add(studentBtn);
@@ -52,5 +61,5 @@ public class TestDevMode {
         devPanel.add(devButtons, java.awt.BorderLayout.CENTER);
         
         return devPanel;
-    }
+     }
 }
