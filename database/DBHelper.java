@@ -1,9 +1,13 @@
+package database;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+
+import models.User;
 
 public class DBHelper {
     private static final String DB_URL = "jdbc:sqlite:seminar.db";

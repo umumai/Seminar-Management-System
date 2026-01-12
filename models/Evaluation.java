@@ -1,3 +1,4 @@
+package models;
 public class Evaluation {
     private int clarityScore;
     private int methodologyScore;

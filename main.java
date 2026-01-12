@@ -1,5 +1,8 @@
 import javax.swing.SwingUtilities;
 
+import database.DBHelper;
+import ui.LoginFrame;
+
 public class main {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> { // ensure GUI is created on the EDT 

@@ -1,6 +1,10 @@
+package ui;
+
 import java.awt.*;
 import java.util.ArrayList;
 import javax.swing.*;
+
+import util.GUI;
 
 public class ScheduleFrame extends JFrame{
 
@@ -17,7 +21,7 @@ public class ScheduleFrame extends JFrame{
         
         //DATA FOR SCHEDULE (all schedule use this same data)
         String[] columns = {"Time", "Event", "Person"};
-        Object[][] data = {
+        Object[][] datas = {
             {"09:00 AM", "Math Class", "Alice"},
             {"10:00 AM", "Science Lab", "Bob"},
             {"11:00 AM", "Meeting", "Admin"}
@@ -47,34 +51,16 @@ public class ScheduleFrame extends JFrame{
 
             //==========
             // add stuffs into the each panel
-            JLabel dateLabel = new JLabel("Date :");
-            dateLabel.setBounds(40, 10, 80, 25);
-            panel.add(dateLabel);
-
-            JLabel dateText = new JLabel(dateList.get(i-1));
-            dateText.setBounds(90, 10, 150, 25);
-            panel.add(dateText);
-
-            JLabel venueLabel = new JLabel("Venue :");
-            venueLabel.setBounds(40, 30, 80, 25);
-            panel.add(venueLabel);
-
-            JLabel venueText = new JLabel(venueList.get(i-1));
-            venueText.setBounds(100, 30, 150, 25);
-            panel.add(venueText);
-
-            JLabel sessionTypeLabel = new JLabel("Session Type :");
-            sessionTypeLabel.setBounds(40, 50, 120, 25);
-            panel.add(sessionTypeLabel);
-
-            JLabel sessionTypeText = new JLabel("Oral");
-            sessionTypeText.setBounds(130, 50, 150, 25);
-            panel.add(sessionTypeText);
-
-            JTable scheduleTable = new JTable(data, columns);
-            JScrollPane schedulePane = new JScrollPane(scheduleTable);
-            schedulePane.setBounds(30, 90, 520, 180);
-            panel.add(schedulePane);
+            GUI.createText("Date :", 40, 10, panel);
+            GUI.createText(dateList.get(i-1), 90, 10, panel);
+            GUI.createText("Venue :", 40, 30, panel);
+            GUI.createText(venueList.get(i-1), 100, 30, panel);
+            GUI.createText("Session Type :", 40, 50, panel);
+            GUI.createText("Oral", 130, 50, panel);
+            //uncomment for example of createClickableText function
+            //GUI.createClikableText("Oral", 130, 50, Color.BLACK, Color.BLUE, panel);
+            
+            GUI.createTable(datas, columns, panel);
 
             //==========
 

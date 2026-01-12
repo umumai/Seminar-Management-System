@@ -1,3 +1,5 @@
+package models;
+
 public class Evaluator extends User {
     public Evaluator (String id, String name, String password){
         super(id, name, "Evaluator", password);
