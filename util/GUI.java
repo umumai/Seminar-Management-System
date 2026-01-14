@@ -49,4 +49,25 @@ public class GUI {
         panel.add(schedulePane);
         return scheduleTable;
     };
+
+    // hover effect to a JButton by changing its background color when touched
+    public static void addHoverBackground(JButton button, Color normalBg, Color hoverBg) {
+        if (button == null) return;
+
+        button.setOpaque(true);
+        // button.setBorderPainted(false);
+        button.setBackground(normalBg);
+
+        button.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                if (button.isEnabled()) button.setBackground(hoverBg);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                button.setBackground(normalBg);
+            }
+        });
+    }
 }
