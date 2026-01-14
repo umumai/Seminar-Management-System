@@ -6,8 +6,8 @@ public class Student extends User {
     private String abstractText;
     private String presentationType;
 
-    public Student( String id, String name, String supervisorName, String researchTitle, String abstractText, String presentationType){
-        super(id, name, "Student");
+    public Student( String id, String name, String password, String supervisorName, String researchTitle, String abstractText, String presentationType){
+        super(id, name, "Student", password);
         this.supervisorName = supervisorName;
         this.researchTitle = researchTitle;
         this.abstractText = abstractText;

@@ -1,4 +1,6 @@
 package models;
+
+//object that holds the session information
 public class Session {
     private String sessionID;
     private String date;
@@ -16,4 +18,19 @@ public class Session {
         return sessionID;
     }
     
+    public String getDate() {
+        return date;
+    }
+    
+    public String getVenue() {
+        return venue;
+    }
+    
+    public String getSessionType() {
+        return sessionType;
+    }
+    
+    public String getDetails() { //returns the session information in a formatted string
+        return String.format("Date: %s | Venue: %s | Type: %s", date, venue, sessionType);
+    }
 }

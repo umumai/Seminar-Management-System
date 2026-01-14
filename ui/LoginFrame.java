@@ -17,10 +17,11 @@ import database.DBHelper;
 import util.TestDevMode;
 
 public class LoginFrame extends JFrame {
-    private final JTextField idField = new JTextField(12);
+    private final JTextField nameField = new JTextField(12);
     private final JPasswordField passField = new JPasswordField(12);
     private final CardLayout cardLayout;
     private final JPanel mainPanel;
+    private StudentPanel studentPanelInstance; // for multi-user support instead of static methods. Also better isolation code
 
     public LoginFrame() {
         setTitle("Seminar Management System");
@@ -38,7 +39,8 @@ public class LoginFrame extends JFrame {
         
         // other panels (Coordinator, Student, Evaluator, Register)
         JPanel coordinatorPanel = CoordinatorPanel.createPanel(this);
-        JPanel studentPanel = StudentPanel.createPanel(this);
+        studentPanelInstance = new StudentPanel(this);
+        JPanel studentPanel = studentPanelInstance.getPanel();
         JPanel evaluatorPanel = EvaluatorPanel.createPanel(this);
         JPanel registerPanel = StudentRegisterPanel.createPanel(this);
 
@@ -60,7 +62,7 @@ public class LoginFrame extends JFrame {
         GridBagConstraints c = new GridBagConstraints();
         c.insets = new Insets(4,4,4,4);
         c.gridx = 0; c.gridy = 0; p.add(new JLabel("ID:"), c);
-        c.gridx = 1; p.add(idField, c);
+        c.gridx = 1; p.add(nameField, c);
         c.gridx = 0; c.gridy = 1; p.add(new JLabel("Password:"), c);
         c.gridx = 1; p.add(passField, c);
 
@@ -78,7 +80,7 @@ public class LoginFrame extends JFrame {
 
 
 
-       // getRootPane().setDefaultButton(loginBtn); // can also press "Enter" to login
+        // getRootPane().setDefaultButton(loginBtn); // press "Enter" to login
 
         loginBtn.addActionListener(e -> doLogin());
 
@@ -91,7 +93,7 @@ public class LoginFrame extends JFrame {
     }
 
     private void doLogin() {
-        String id = idField.getText().trim();
+        String id = nameField.getText().trim();
         String pass = new String(passField.getPassword());
         if (id.isEmpty() || pass.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Enter ID and password");
@@ -125,7 +127,9 @@ public class LoginFrame extends JFrame {
                 return;
 
             case "STUDENT":
-                StudentPanel.setUser(u);
+                if (studentPanelInstance != null) {
+                    studentPanelInstance.setUser(u);
+                }
                 cardLayout.show(mainPanel, "StudentPanel");
                 return;
             case "EVALUATOR":
@@ -141,5 +145,9 @@ public class LoginFrame extends JFrame {
 
     public void showPanel(String panelName) {
         cardLayout.show(mainPanel, panelName);
+    }
+    
+    public StudentPanel getStudentPanel() {
+        return studentPanelInstance;
     }
 }
