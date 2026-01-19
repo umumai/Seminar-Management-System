@@ -1,5 +1,3 @@
-
-
 import java.awt.*;
 import javax.swing.*;
 
@@ -17,27 +15,28 @@ public class MainFrame extends JFrame {
         container = new JPanel(cardLayout);
 
         // Create screens
-        EditSchedule editSchedule = new EditSchedule(this);
-        ScheduleFrame viewSchedule = new ScheduleFrame(this);
+        EditSchedule editScheduleFrame = new EditSchedule(this);
+        ScheduleFrame viewScheduleFrame = new ScheduleFrame(this);
         CoordinatorFrame coordinatorFrame = new CoordinatorFrame(this);
-        CreateSeminar createSeminar = new CreateSeminar(this);
-        StudentReport viewReport = new StudentReport(this);
+        StudMngmentFrame studMngmentFrame = new StudMngmentFrame(this);
+        ReportFrame reportFrame = new ReportFrame(this);
 
         // store screen into a single JPanel holding all the CardLayout (container)
-        container.add(editSchedule, "EDIT-SCHEDULE");
-        container.add(viewSchedule, "VIEW-SCHEDULE");
-        container.add(coordinatorFrame,"COORDINATOR");
-        container.add(viewReport,"VIEW-REPORT");
+        container.add(editScheduleFrame, "EDIT-SCHEDULE");
+        container.add(viewScheduleFrame, "VIEW-SCHEDULE");
+        container.add(coordinatorFrame,"coordinatorFrame");
+        container.add(studMngmentFrame,"studMngmentFrame");
+        container.add(reportFrame,"reportFrame");
 
         // add the container which contains all the CardLayout
         add(container);
         //show which screen u want to
-        cardLayout.show(container, "COORDINATOR"); //show the first screen to be displayed
+        cardLayout.show(container, "coordinatorFrame"); //show the first screen to be displayed
 
         setVisible(true);
     }
 
-    // Navigation method (IMPORTANT)
+    // Navigation method 
     public void showScreen(String name) {
         cardLayout.show(container, name);
         System.out.println("Switching to screen " + name);

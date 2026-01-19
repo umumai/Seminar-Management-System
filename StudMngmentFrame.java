@@ -2,21 +2,22 @@ import java.awt.*;
 import java.util.ArrayList;
 import javax.swing.*;
 
-public class EditSchedule extends JPanel{
+//dalam coordinator frame ni kita just place the JTabbedPane. 
+// and then we place the other frame (from other file) into each tabs
+public class StudMngmentFrame extends JPanel {
     private MainFrame frame;
     String state = "edit";
     public Color deepBlue = new Color(14,69,128);
-    //public Color beige = new Color(228, 219, 210);
     
-    public EditSchedule(MainFrame frame){
+    
+    public StudMngmentFrame(MainFrame frame) {
         this.frame=frame;
         setLayout(new BorderLayout());
-        setBackground(deepBlue);
 
+        //top Panel
         JPanel topPanel = new JPanel(new BorderLayout());
-        //topPanel.setBackground(beige);
         topPanel.setBorder(BorderFactory.createEmptyBorder(5,15,5,5));
-        JLabel coordinatorLabel = new JLabel("Manage Schedule"); 
+        JLabel coordinatorLabel = new JLabel("Student Management"); 
         JButton returnButton = new JButton("return");
         returnButton.addActionListener(e->frame.showScreen("coordinatorFrame"));
         topPanel.add(coordinatorLabel,BorderLayout.WEST);
@@ -52,78 +53,105 @@ public class EditSchedule extends JPanel{
         tablePanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
 
         //header row
-        JButton R1C1 = headerBox("Time", Color.BLACK, Color.white);
-        JButton R1C2 = headerBox("Student Name", Color.BLACK, Color.white);
-        JButton R1C3 = headerBox("Evaluator Name", Color.BLACK, Color.white);
+        JButton R1C1 = headerBox("Student ID", deepBlue, Color.white);
+        JButton R1C2 = headerBox("Student Name", deepBlue, Color.white);
+        JButton R1C3 = headerBox("Evaluator Name", deepBlue, Color.white);
+        JButton R1C4 = headerBox("Status", deepBlue, Color.white);
+
         //9:00AM row
-        JButton R2C1 = headerBox("9:00AM", Color.BLACK, Color.white);
-        JButton R2C2 = studentBox("", Color.white, Color.black);
-        JButton R2C3 = evaluatorBox("", Color.white, Color.black);
+        JButton R2C1 = headerBox("0001", deepBlue, Color.white);
+        JButton R2C2 = studentBox("", Color.white, deepBlue);
+        JButton R2C3 = evaluatorBox("", Color.white, deepBlue);
+        JButton R2C4 = statusBox("", Color.white, deepBlue);
+
         //10:00AM row
-        JButton R3C1 = headerBox("10:00AM", Color.BLACK, Color.white);
-        JButton R3C2 = studentBox("", Color.white, Color.black);
-        JButton R3C3 = evaluatorBox("", Color.white, Color.black);
+        JButton R3C1 = headerBox("0002", deepBlue, Color.white);
+        JButton R3C2 = studentBox("", Color.white, deepBlue);
+        JButton R3C3 = evaluatorBox("", Color.white, deepBlue);
+        JButton R3C4 = statusBox("", Color.white, deepBlue);
+
         //11:00AM row
-        JButton R4C1 = headerBox("11:00AM", Color.BLACK, Color.white);
-        JButton R4C2 = studentBox("", Color.white, Color.black);
-        JButton R4C3 = evaluatorBox("", Color.white, Color.black);
+        JButton R4C1 = headerBox("", deepBlue, Color.white);
+        JButton R4C2 = studentBox("", Color.white, deepBlue);
+        JButton R4C3 = evaluatorBox("", Color.white, deepBlue);
+        JButton R4C4 = statusBox("", Color.white, deepBlue);
+
         //12:00PM row
-        JButton R5C1 = headerBox("12:00PM", Color.BLACK, Color.white);
-        JButton R5C2 = studentBox("", Color.white, Color.black);
-        JButton R5C3 = evaluatorBox("", Color.white, Color.black);
+        JButton R5C1 = headerBox("", deepBlue, Color.white);
+        JButton R5C2 = studentBox("", Color.white, deepBlue);
+        JButton R5C3 = evaluatorBox("", Color.white, deepBlue);
+        JButton R5C4 = statusBox("", Color.white, deepBlue);
+
         //1:00PM row
-        JButton R6C1 = headerBox("1:00PM", Color.BLACK, Color.white);
-        JButton R6C2 = studentBox("", Color.white, Color.black);
-        JButton R6C3 = evaluatorBox("", Color.white, Color.black);
+        JButton R6C1 = headerBox("", deepBlue, Color.white);
+        JButton R6C2 = studentBox("", Color.white, deepBlue);
+        JButton R6C3 = evaluatorBox("", Color.white, deepBlue);
+        JButton R6C4 = statusBox("", Color.white, deepBlue);
+
         //2:00PM row
-        JButton R7C1 = headerBox("2:00PM", Color.BLACK, Color.white);
-        JButton R7C2 = studentBox("", Color.white, Color.black);
-        JButton R7C3 = evaluatorBox("", Color.white, Color.black);
+        JButton R7C1 = headerBox("", deepBlue, Color.white);
+        JButton R7C2 = studentBox("", Color.white, deepBlue);
+        JButton R7C3 = evaluatorBox("", Color.white, deepBlue);
+        JButton R7C4 = statusBox("", Color.white, deepBlue);
+
         //3:00PM row
-        JButton R8C1 = headerBox("3:00PM", Color.BLACK, Color.white);
-        JButton R8C2 = studentBox("", Color.white, Color.black);
-        JButton R8C3 = evaluatorBox("", Color.white, Color.black);
+        JButton R8C1 = headerBox("", deepBlue, Color.white);
+        JButton R8C2 = studentBox("", Color.white, deepBlue);
+        JButton R8C3 = evaluatorBox("", Color.white, deepBlue);
+        JButton R8C4 = statusBox("", Color.white, deepBlue);
+
         //4:00PM row
-        JButton R9C1 = headerBox("4:00PM", Color.BLACK, Color.white);
-        JButton R9C2 = studentBox("", Color.white, Color.black);
-        JButton R9C3 = evaluatorBox("", Color.white, Color.black);
+        JButton R9C1 = headerBox("", deepBlue, Color.white);
+        JButton R9C2 = studentBox("", Color.white, deepBlue);
+        JButton R9C3 = evaluatorBox("", Color.white, deepBlue);
+        JButton R9C4 = statusBox("", Color.white, deepBlue);
+
 
         //add all the JButton into the table panel
         tablePanel.add(R1C1);
         tablePanel.add(R1C2);
         tablePanel.add(R1C3);
+        tablePanel.add(R1C4);
 
         tablePanel.add(R2C1);
         tablePanel.add(R2C2);
         tablePanel.add(R2C3);
+        tablePanel.add(R2C4);
 
         tablePanel.add(R3C1);
         tablePanel.add(R3C2);
         tablePanel.add(R3C3);
+        tablePanel.add(R3C4);
 
         tablePanel.add(R4C1);
         tablePanel.add(R4C2);
         tablePanel.add(R4C3);
+        tablePanel.add(R4C4);
 
         tablePanel.add(R5C1);
         tablePanel.add(R5C2);
         tablePanel.add(R5C3);
+        tablePanel.add(R5C4);
 
         tablePanel.add(R6C1);
         tablePanel.add(R6C2);
         tablePanel.add(R6C3);
+        tablePanel.add(R6C4);
 
         tablePanel.add(R7C1);
         tablePanel.add(R7C2);
         tablePanel.add(R7C3);
+        tablePanel.add(R7C4);
 
         tablePanel.add(R8C1);
         tablePanel.add(R8C2);
         tablePanel.add(R8C3);
+        tablePanel.add(R8C4);
 
         tablePanel.add(R9C1);
         tablePanel.add(R9C2);
         tablePanel.add(R9C3);
+        tablePanel.add(R9C4);
 
 
         JButton saveButton = buttonEdit();
@@ -156,7 +184,6 @@ public class EditSchedule extends JPanel{
     studentList.add("Fatimah");
     studentList.add("Ummu");
     studentList.add("Nisah");
-    // later you can add more dynamically
     studentList.add("Busyra");
 
     // Convert ArrayList to array
@@ -198,7 +225,6 @@ public class EditSchedule extends JPanel{
     evaluatorList.add("Ng Hu");
     evaluatorList.add("Willie Poh");
     evaluatorList.add("Farhah");
-    // later you can add more dynamically
     evaluatorList.add("Khairil");
 
     // Convert ArrayList to array
@@ -272,6 +298,27 @@ public class EditSchedule extends JPanel{
         return btn;
     }
 
+    String status = "view Report";
+    public JButton statusBox(String text, Color bgColor, Color textColor){
+        JButton btn = new JButton(text);
+        btn.setBackground(bgColor);
+        btn.setForeground(textColor);
+        btn.setFocusPainted(false);
+        // btn.setBorderPainted(true);
+        btn.addActionListener(e -> {
+            if("view Report".equals(status)) {
+                frame.showScreen("reportFrame");
+                btn.setText("view Report");
+            }
+                // } else {
+            //     //status = "view Report";
+            //     btn.setText("generate Report");
+            // } 
+
+        });
+        return btn;
+    }
+
     public JButton buttonEdit(){
         JButton btn = new JButton("edit");
         btn.setBackground(deepBlue);
@@ -297,4 +344,5 @@ public class EditSchedule extends JPanel{
         //btn.addActionListener(e -> frame.showScreen("VIEW-SCHEDULE")); 
         return btn;
     }
+    
 }
