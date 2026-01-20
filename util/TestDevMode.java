@@ -30,7 +30,10 @@ public class TestDevMode {
         // Test Student Button 
         studentBtn.addActionListener(e -> {
             User testUser = new User("STU001", "Test Student", "STUDENT", "");
-            StudentPanel.setUser(testUser);
+            StudentPanel studentPanel = parent.getStudentPanel();
+            if (studentPanel != null) {
+                studentPanel.setUser(testUser);
+            }
             if (parent instanceof LoginFrame) {
                 ((LoginFrame) parent).showPanel("StudentPanel");
             }
