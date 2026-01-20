@@ -1,6 +1,7 @@
 import javax.swing.SwingUtilities;
 
-import database.DBHelper;
+import Database.DBHelper;
+import ui.CLNavigation;
 import ui.LoginFrame;
 
 public class main {
@@ -9,7 +10,7 @@ public class main {
             DBHelper.authenticate(null, null);
             LoginFrame lf = new LoginFrame(); // open login frame
             lf.setVisible(true);
-
+            CLNavigation cl = new CLNavigation();
                         
             // DEV MODE (Switch to any panel name to open it)
             // lf.showPanel("CoordinatorPanel");  // open coordinator panel
