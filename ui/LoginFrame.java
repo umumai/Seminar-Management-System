@@ -1,5 +1,6 @@
 package ui;
 
+import Database.DBHelper;
 import java.awt.CardLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -11,9 +12,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
-
 import models.User;
-import database.DBHelper;
 import util.TestDevMode;
 
 public class LoginFrame extends JFrame {
@@ -38,11 +37,16 @@ public class LoginFrame extends JFrame {
         JPanel loginPanel = createLoginPanel();
         
         // other panels (Coordinator, Student, Evaluator, Register)
-        JPanel coordinatorPanel = CoordinatorPanel.createPanel(this);
+        JPanel coordinatorPanel = new CoordinatorFrame(this);
         studentPanelInstance = new StudentPanel(this);
         JPanel studentPanel = studentPanelInstance.getPanel();
         JPanel evaluatorPanel = EvaluatorPanel.createPanel(this);
         JPanel registerPanel = StudentRegisterPanel.createPanel(this);
+        JPanel scheduleFrame = new ScheduleFrame(this);
+        JPanel editSchedulePanel = new EditSchedule(this);
+        JPanel reportPanel = new ReportFrame(this);
+        JPanel studManagementPanel = new StudMngmentFrame(this);
+
 
         // Add all panels to CardLayout
         mainPanel.add(loginPanel, "LoginPanel");
@@ -50,6 +54,11 @@ public class LoginFrame extends JFrame {
         mainPanel.add(studentPanel, "StudentPanel");
         mainPanel.add(evaluatorPanel, "EvaluatorPanel");
         mainPanel.add(registerPanel, "RegisterPanel");
+        mainPanel.add(scheduleFrame, "schedulePanel");
+        mainPanel.add(editSchedulePanel, "editSchedulePanel");
+        mainPanel.add(reportPanel, "reportPanel");
+        mainPanel.add(studManagementPanel, "studManagementPanel");
+
 
         add(mainPanel);
 

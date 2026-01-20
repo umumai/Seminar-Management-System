@@ -9,7 +9,7 @@
  * This class only contains database code (no UI logic).
  */
 
-package database;
+package Database;
 import java.sql.*;
 
 public class SubmissionDAO {

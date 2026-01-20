@@ -1,5 +1,6 @@
 package ui;
 
+import Database.DBHelper;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -11,8 +12,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
-
-import database.DBHelper;
 
 public class StudentRegisterPanel {
     public static JPanel createPanel(JFrame parent) {

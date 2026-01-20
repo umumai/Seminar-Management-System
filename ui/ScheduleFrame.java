@@ -1,87 +1,162 @@
 package ui;
-
 import java.awt.*;
 import java.util.ArrayList;
 import javax.swing.*;
 
-import util.GUI;
+public class ScheduleFrame extends JPanel {
+    private JFrame frame;
+    public Color deepBlue = new Color(14,69,128);
+    private void changeName(JButton btn) {
 
-public class ScheduleFrame extends JFrame{
+    //convert the string into a combobox
+    ArrayList<String> studentList = new ArrayList<>();
+    studentList.add("Fatimah");
+    studentList.add("Ummu");
+    studentList.add("Nisah");
+    // later you can add more dynamically
+    studentList.add("Busyra");
 
-    //constructor
-    public ScheduleFrame(){
-        //defaults
-        super("Postgraduate Academic Research Seminar");
-        setSize(600, 400);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setLayout(new BorderLayout());
-        
-        //schedulePanel is the main panel
-        JPanel schedulePanel = new JPanel(new BorderLayout());
-        
-        //DATA FOR SCHEDULE (all schedule use this same data)
-        String[] columns = {"Time", "Event", "Person"};
-        Object[][] datas = {
-            {"09:00 AM", "Math Class", "Alice"},
-            {"10:00 AM", "Science Lab", "Bob"},
-            {"11:00 AM", "Meeting", "Admin"}
-        };
+    // Convert ArrayList to array
+    String[] studentListArray = studentList.toArray(new String[0]);
+    JComboBox<String> roleCombo = new JComboBox<>(studentListArray);
 
-        //Store for date info
-        ArrayList<String> dateList = new ArrayList<>();
-        dateList.add("12 Dec 2025");
-        dateList.add("1 Jan 2026");
-        dateList.add("15 Jan 2026");
+    JPanel panel = new JPanel(new GridLayout(0, 1));
+    panel.add(new JLabel("Choose role:"));
+    panel.add(roleCombo);
 
-        //Store for venue info
-        ArrayList<String> venueList = new ArrayList<>();
-        venueList.add("CQCR1004");
-        venueList.add("CNMX0001");
-        venueList.add("CNMX0003");
+    int result = JOptionPane.showConfirmDialog(
+            this,
+            panel,
+            "Select Role",
+            JOptionPane.OK_CANCEL_OPTION,
+            JOptionPane.PLAIN_MESSAGE
+    );
 
-        int sessionList = 3;
-        int tabsList = sessionList;
+    if (result == JOptionPane.OK_OPTION) {
+        //item that are chosen from the combobox stored inside role
+        String selectedChoice = (String) roleCombo.getSelectedItem();
 
-        JTabbedPane scheduleTabs = new JTabbedPane();
-
-        for (int i = 1; i <= tabsList; i++) {
-            JPanel panel = new JPanel();
-            panel.setLayout(null);
-            String tabsName = "Session " + i;
-
-            //==========
-            // add stuffs into the each panel
-            GUI.createText("Date :", 40, 10, panel);
-            GUI.createText(dateList.get(i-1), 90, 10, panel);
-            GUI.createText("Venue :", 40, 30, panel);
-            GUI.createText(venueList.get(i-1), 100, 30, panel);
-            GUI.createText("Session Type :", 40, 50, panel);
-            GUI.createText("Oral", 130, 50, panel);
-            //uncomment for example of createClickableText function
-            //GUI.createClikableText("Oral", 130, 50, Color.BLACK, Color.BLUE, panel);
-            
-            GUI.createTable(datas, columns, panel);
-
-            //==========
-
-            scheduleTabs.addTab(tabsName, panel);
+        for (String choice : studentList) {
+            if (selectedChoice.equals(choice)) {
+                System.out.println(choice + " selected");
+                btn.setText(choice);
+                //result = choice [choice = "Fatimah"]
+                // openRoleScreen(role); // call function dynamically
+                break;
+            }
         }
+    }
+}
 
-        schedulePanel.add(scheduleTabs,BorderLayout.CENTER);
+    public ScheduleFrame(JFrame frame) {
+        this.frame = frame;
+        // super("Postgraduate Academic Research Seminar");
+        // setSize(600, 400);
+        // setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setLayout(new BorderLayout());
 
-        //===========
-        //BOTTOM PANEL
-        JPanel bottomPanel = new JPanel(new BorderLayout());
-        JButton returnButton = new JButton("return");
-        bottomPanel.add(returnButton,BorderLayout.EAST);
-        bottomPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
-        schedulePanel.add(bottomPanel,BorderLayout.SOUTH);
-        //=============
+        //main panel
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        ArrayList<String> dateList = new ArrayList<>();
+        dateList.add("12-OCT-2025");
+        dateList.add("28-JAN-2026");
+        dateList.add("3-FEB-2026");
+        // later you can add more dynamically
+        dateList.add("Busyra");
+        //top panel
+        JPanel topPanel = new JPanel(new GridLayout(3, 1, 2, 2));
+        topPanel.setBorder(BorderFactory.createEmptyBorder(10, 30, 10, 10));
+        topPanel.add(new JLabel("Date : " + dateList.get(0)));
+        topPanel.add(new JLabel("Venue : "));
+        topPanel.add(new JLabel("Presentation Type : "));
         
+        //table panel
+        JPanel tablePanel = new JPanel(new GridLayout(9, 3, 1, 1));
+        tablePanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+
+        //header row
+        createBox("Time", Color.BLACK, Color.white, tablePanel);
+        createBox("Student Name", Color.BLACK, Color.white, tablePanel);
+        createBox("Evaluator Name", Color.BLACK, Color.white, tablePanel);
+        //9:00AM row
+        createBox("9:00AM", Color.BLACK, Color.white, tablePanel);
+        JButton btn1 = createButton("tea", Color.white, Color.black, tablePanel);
+        createButton("", Color.white, Color.black, tablePanel);
+        //10:00AM row
+        createBox("10:00AM", Color.BLACK, Color.white, tablePanel);
+        createButton("", Color.white, Color.black, tablePanel);
+        createButton("", Color.white, Color.black, tablePanel);
+        //11:00AM row
+        createBox("11:00AM", Color.BLACK, Color.white, tablePanel);
+        createButton("", Color.white, Color.black, tablePanel);
+        createButton("", Color.white, Color.black, tablePanel);
+        //12:00PM row
+        createBox("12:00PM", Color.BLACK, Color.white, tablePanel);
+        createButton("", Color.white, Color.black, tablePanel);
+        createButton("", Color.white, Color.black, tablePanel);
+        //1:00PM row
+        createBox("1:00PM", Color.BLACK, Color.white, tablePanel);
+        createButton("", Color.white, Color.black, tablePanel);
+        createButton("", Color.white, Color.black, tablePanel);
+        //2:00PM row
+        createBox("2:00PM", Color.BLACK, Color.white, tablePanel);
+        createButton("", Color.white, Color.black, tablePanel);
+        createButton("", Color.white, Color.black, tablePanel);
+        //3:00PM row
+        createBox("3:00PM", Color.BLACK, Color.white, tablePanel);
+        createButton("", Color.white, Color.black, tablePanel);
+        createButton("", Color.white, Color.black, tablePanel);
+        //4:00PM row
+        createBox("4:00PM", Color.BLACK, Color.white, tablePanel);
+        createButton("", Color.white, Color.black, tablePanel);
+        createButton("", Color.white, Color.black, tablePanel);
+
+        //bottom panel - might delete later kalau xguna lgsung
+        JPanel bottomPanel = new JPanel(new BorderLayout());
+        bottomPanel.setBorder(BorderFactory.createEmptyBorder(0, 20, 10, 20));
+        // bottomPanel.add(createButtonSave("save", Color.green, Color.white, bottomPanel),BorderLayout.EAST);        
+     
+        //add other panels to main Panel
+        mainPanel.add(topPanel, BorderLayout.NORTH);
+        mainPanel.add(tablePanel, BorderLayout.CENTER);
+        mainPanel.add(bottomPanel, BorderLayout.SOUTH);
 
         //final setup
-        add(schedulePanel);
+        add(mainPanel);
         setVisible(true);
     }
 
+    public JButton createBox(String text, Color bgColor, Color textColor, JPanel panel){
+        JButton btn = new JButton(text);
+        btn.setBackground(bgColor);
+        btn.setForeground(textColor);
+        btn.setFocusPainted(false);
+        btn.setBorderPainted(false);
+        btn.setEnabled(false);
+        panel.add(btn);
+        return btn;
+    }
+
+    public JButton createButton(String text, Color bgColor, Color textColor, JPanel panel){
+        JButton btn = new JButton(text);
+        btn.setBackground(bgColor);
+        btn.setForeground(textColor);
+        btn.setEnabled(false);
+        // btn.setBorderPainted(true);
+        panel.add(btn);
+        return btn;
+    }
+
+    public JButton createButtonSave(String text, Color bgColor, Color textColor, JPanel panel){
+        JButton btn = new JButton(text);
+        btn.setBackground(bgColor);
+        btn.setForeground(textColor);
+        btn.setFocusPainted(false);
+        panel.add(btn);
+        return btn;
+    }
+
+    // public static void main(String[] args) {
+    //     new ScheduleFrame();
+    // }
 }
