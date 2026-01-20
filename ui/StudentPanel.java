@@ -10,7 +10,7 @@ import javax.swing.filechooser.FileNameExtensionFilter; //sub-package for file c
 
 import models.User;
 import models.Session;
-import database.DBHelper;
+import Database.DBHelper;
 
 public class StudentPanel {
     private static final Logger logger = Logger.getLogger(StudentPanel.class.getName());
