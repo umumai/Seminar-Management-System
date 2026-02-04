@@ -1,12 +1,15 @@
 package ui;
+import Database.DBHelper;
 import java.awt.*;
 import java.util.ArrayList;
 import javax.swing.*;
+import models.Session;
 
 //dalam coordinator frame ni kita just place the JTabbedPane. 
 // and then we place the other frame (from other file) into each tabs
 public class StudMngmentFrame extends JPanel {
     private JFrame frame;
+    
     String state = "edit";
     public Color deepBlue = new Color(14,69,128);
     
@@ -35,19 +38,22 @@ public class StudMngmentFrame extends JPanel {
         //panels are stored inside tabbedPane
         JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.LEFT);
         //configure how many session exist
-        int sessionList = 5;
+        int sessionList = DBHelper.getSessionCount();
+        System.err.println("DEBUG : Total session exist = " + sessionList);
         for (int i = 1; i <= sessionList; i++) {
             JPanel mainPanel = new JPanel(new BorderLayout());
             //adjust the tab name here
             String tabsName = "Session " + i;
+
+            Session session = DBHelper.getSession(i);
             //create stuffs here==========
-            //JLabel label = new JLabel(tabsName);
+            
         
         JPanel detailsPanel = new JPanel(new GridLayout(3, 1, 2, 2));
         detailsPanel.setBorder(BorderFactory.createEmptyBorder(10, 30, 10, 10));
-        detailsPanel.add(new JLabel("Date : " + dateList.get(0)));
-        detailsPanel.add(new JLabel("Venue : "));
-        detailsPanel.add(new JLabel("Presentation Type : "));
+        detailsPanel.add(new JLabel("Date : " + session.getDate()));
+        detailsPanel.add(new JLabel("Venue : " + session.getVenue()));
+        detailsPanel.add(new JLabel("Presentation Type : " + session.getSessionType()));
         
         //table panel
         JPanel tablePanel = new JPanel(new GridLayout(9, 3, 1, 1));
@@ -59,49 +65,49 @@ public class StudMngmentFrame extends JPanel {
         JButton R1C3 = headerBox("Evaluator Name", deepBlue, Color.white);
         JButton R1C4 = headerBox("Status", deepBlue, Color.white);
 
-        //9:00AM row
+        //1st student
         JButton R2C1 = headerBox("0001", deepBlue, Color.white);
         JButton R2C2 = studentBox("", Color.white, deepBlue);
         JButton R2C3 = evaluatorBox("", Color.white, deepBlue);
         JButton R2C4 = statusBox("", Color.white, deepBlue);
 
-        //10:00AM row
+        //2nd student
         JButton R3C1 = headerBox("0002", deepBlue, Color.white);
         JButton R3C2 = studentBox("", Color.white, deepBlue);
         JButton R3C3 = evaluatorBox("", Color.white, deepBlue);
         JButton R3C4 = statusBox("", Color.white, deepBlue);
 
-        //11:00AM row
+        //3rd student
         JButton R4C1 = headerBox("", deepBlue, Color.white);
         JButton R4C2 = studentBox("", Color.white, deepBlue);
         JButton R4C3 = evaluatorBox("", Color.white, deepBlue);
         JButton R4C4 = statusBox("", Color.white, deepBlue);
 
-        //12:00PM row
+        //4th student
         JButton R5C1 = headerBox("", deepBlue, Color.white);
         JButton R5C2 = studentBox("", Color.white, deepBlue);
         JButton R5C3 = evaluatorBox("", Color.white, deepBlue);
         JButton R5C4 = statusBox("", Color.white, deepBlue);
 
-        //1:00PM row
+        //5th student
         JButton R6C1 = headerBox("", deepBlue, Color.white);
         JButton R6C2 = studentBox("", Color.white, deepBlue);
         JButton R6C3 = evaluatorBox("", Color.white, deepBlue);
         JButton R6C4 = statusBox("", Color.white, deepBlue);
 
-        //2:00PM row
+        //6th student
         JButton R7C1 = headerBox("", deepBlue, Color.white);
         JButton R7C2 = studentBox("", Color.white, deepBlue);
         JButton R7C3 = evaluatorBox("", Color.white, deepBlue);
         JButton R7C4 = statusBox("", Color.white, deepBlue);
 
-        //3:00PM row
+        //7th student
         JButton R8C1 = headerBox("", deepBlue, Color.white);
         JButton R8C2 = studentBox("", Color.white, deepBlue);
         JButton R8C3 = evaluatorBox("", Color.white, deepBlue);
         JButton R8C4 = statusBox("", Color.white, deepBlue);
 
-        //4:00PM row
+        //8th student
         JButton R9C1 = headerBox("", deepBlue, Color.white);
         JButton R9C2 = studentBox("", Color.white, deepBlue);
         JButton R9C3 = evaluatorBox("", Color.white, deepBlue);

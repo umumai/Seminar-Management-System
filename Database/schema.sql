@@ -71,3 +71,14 @@ CREATE TABLE IF NOT EXISTS report (
     report_type TEXT,
     generated_date TEXT
 );
+
+CREATE TABLE IF NOT EXISTS appointments (
+    appointment_id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    session_id INTEGER,
+    student_id INTEGER,
+    evaluator_id INTEGER,
+    time INTEGER,
+    FOREIGN KEY (session_id) REFERENCES session(session_id),
+    FOREIGN KEY (student_id) REFERENCES users(user_id),
+    FOREIGN KEY (evaluator_id) REFERENCES users(user_id)
+);

@@ -1,7 +1,9 @@
 package ui;
+import Database.DBHelper;
 import java.awt.*;
 import java.util.ArrayList;
 import javax.swing.*;
+import models.Session;
 
 public class EditSchedule extends JPanel{
     private JFrame frame;
@@ -36,19 +38,21 @@ public class EditSchedule extends JPanel{
         //panels are stored inside tabbedPane
         JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.LEFT);
         //configure how many session exist
-        int sessionList = 5;
+        int sessionList = DBHelper.getSessionCount();
+        System.err.println("DEBUG : Total session exist = " + sessionList);
         for (int i = 1; i <= sessionList; i++) {
             JPanel mainPanel = new JPanel(new BorderLayout());
             //adjust the tab name here
             String tabsName = "Session " + i;
+            Session session = DBHelper.getSession(i);
             //create stuffs here==========
-            //JLabel label = new JLabel(tabsName);
+            
         
         JPanel detailsPanel = new JPanel(new GridLayout(3, 1, 2, 2));
         detailsPanel.setBorder(BorderFactory.createEmptyBorder(10, 30, 10, 10));
-        detailsPanel.add(new JLabel("Date : " + dateList.get(0)));
-        detailsPanel.add(new JLabel("Venue : "));
-        detailsPanel.add(new JLabel("Presentation Type : "));
+        detailsPanel.add(new JLabel("Date : " + session.getDate()));
+        detailsPanel.add(new JLabel("Venue : " + session.getVenue()));
+        detailsPanel.add(new JLabel("Presentation Type : " + session.getSessionType()));
         
         //table panel
         JPanel tablePanel = new JPanel(new GridLayout(9, 3, 1, 1));
