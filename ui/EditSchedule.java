@@ -135,10 +135,13 @@ public class EditSchedule extends JPanel{
         tablePanel.add(R9C3);
 
         JButton saveButton = buttonEdit();
+        JLabel instruction = new JLabel("Click edit to start assigning.");
+        instruction.setForeground(Color.GRAY);
         //bottom panel
         JPanel bottomPanel = new JPanel(new BorderLayout());
         bottomPanel.setBorder(BorderFactory.createEmptyBorder(0, 20, 10, 20));
         bottomPanel.add(saveButton,BorderLayout.EAST);        
+        bottomPanel.add(instruction,BorderLayout.WEST);
         mainPanel.add(bottomPanel, BorderLayout.SOUTH);
         } else {
             JLabel text = new JLabel("Timetable unavailable as student not registered to this seminar yet.");
@@ -175,7 +178,7 @@ public class EditSchedule extends JPanel{
 
     JPanel panel = new JPanel(new GridLayout(0, 1));
     // if ((DBHelper.getStudentIdFromAppointment(session, 0)) != null){
-    panel.add(new JLabel("Choose role:"));
+    panel.add(new JLabel("Choose student to assign:"));
     panel.add(roleCombo);
 
         int result = JOptionPane.showConfirmDialog(
