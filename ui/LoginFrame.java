@@ -13,6 +13,7 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import models.User;
+import models.Coordinator;
 import util.TestDevMode;
 
 public class LoginFrame extends JFrame {
@@ -21,11 +22,13 @@ public class LoginFrame extends JFrame {
     private final CardLayout cardLayout;
     private final JPanel mainPanel;
     private StudentPanel studentPanelInstance; // for multi-user support instead of static methods. Also better isolation code
+    private User currentUser; // Store authenticated user
+    private CoordinatorFrame coordinatorPanelInstance; // Cache for coordinator panel
 
     public LoginFrame() {
         setTitle("Seminar Management System");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setSize(600, 400);
+        setSize(1000, 500);
         setLocationRelativeTo(null);
 
 
@@ -37,7 +40,8 @@ public class LoginFrame extends JFrame {
         JPanel loginPanel = createLoginPanel();
         
         // other panels (Coordinator, Student, Evaluator, Register)
-        JPanel coordinatorPanel = new CoordinatorFrame(this);
+        coordinatorPanelInstance = new CoordinatorFrame(this, new Coordinator("COO000", "Coordinator")); // Create with dummy user
+        JPanel coordinatorPanel = coordinatorPanelInstance;
         studentPanelInstance = new StudentPanel(this);
         JPanel studentPanel = studentPanelInstance.getPanel();
         JPanel evaluatorPanel = EvaluatorPanel.createPanel(this);
@@ -128,10 +132,19 @@ public class LoginFrame extends JFrame {
         }
 
         String role = u.getRole();
+        if (role != null) {
+            role = role.trim().toUpperCase(); // Normalize role to uppercase
+        }
+        System.out.println("DEBUG: Logged in user - ID: " + u.getId() + ", Name: " + u.getName() + ", Role: '" + role + "'");
+        this.currentUser = u; // Store the authenticated user
         // int code = 0;
         switch (role) {
 
-            case "COORDINATOR": 
+            case "COORDINATOR":
+                // Update coordinator panel with authenticated user - convert to Coordinator
+                System.out.println("DEBUG: Switching to COORDINATOR panel"); // Debug
+                Coordinator coordinator = new Coordinator(u.getId(), u.getName());
+                coordinatorPanelInstance.updateUser(coordinator);
                 cardLayout.show(mainPanel, "CoordinatorPanel");
                 return;
 
@@ -145,7 +158,12 @@ public class LoginFrame extends JFrame {
                 EvaluatorPanel.setUser(u);
                 cardLayout.show(mainPanel, "EvaluatorPanel");
                 return;
-        }
+            
+            default:
+                System.out.println("DEBUG: No matching role found. Role was: '" + role + "'"); // Debug
+                JOptionPane.showMessageDialog(this, "Unknown role: " + role);
+                return;
+            }
     }
 
     public void showLoginPanel() {
@@ -158,5 +176,9 @@ public class LoginFrame extends JFrame {
     
     public StudentPanel getStudentPanel() {
         return studentPanelInstance;
+    }
+    
+    public User getCurrentUser() {
+        return currentUser;
     }
 }
