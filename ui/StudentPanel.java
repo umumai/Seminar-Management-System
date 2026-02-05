@@ -92,7 +92,7 @@ public class StudentPanel {
         
         // Welcome label
         String welcomeText = currentUser != null 
-            ? "WELCOME, " + currentUser.getName() + " (" + currentUser.getId() + ")"
+            ? "WELCOME, " + currentUser.getName() + " (" + currentUser.getId() + ")" 
             : "WELCOME, Student";
         JLabel welcomeLabel = new JLabel(welcomeText);
         welcomeLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
