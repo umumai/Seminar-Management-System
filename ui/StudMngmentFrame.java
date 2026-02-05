@@ -223,64 +223,13 @@ public class StudMngmentFrame extends JPanel {
     }
 
     //====================================================================================
-    private void changeStudName(JButton btn) {
-
-    ArrayList<String> studentList = new ArrayList<>();
-
-    // for (int x = 1; x < 10; x++) {
-    //     // if ((DBHelper.checkUserbyRow(x))){
-    //     //     studentList.add(DBHelper.getUserByRole("STUDENT",x));
-    //     //     evaluators = DBHelper.getUserByRole("Evaluator",x);
-    //     // }
-    //     //convert the string into a combobox
-    //     // studentList.add("Fatimah");
-    //     // studentList.add("Ummu");
-    //     // studentList.add("Nisah");
-    //     // studentList.add("Busyra");
-        
-    // }
-
-    // Convert ArrayList to array
-    String[] studentListArray = studentList.toArray(new String[0]);
-    JComboBox<String> roleCombo = new JComboBox<>(studentListArray);
-
-    JPanel panel = new JPanel(new GridLayout(0, 1));
-    panel.add(new JLabel("Choose role:"));
-    panel.add(roleCombo);
-
-        int result = JOptionPane.showConfirmDialog(
-                this,
-                panel,
-                "Select Role",
-                JOptionPane.OK_CANCEL_OPTION,
-                JOptionPane.PLAIN_MESSAGE
-        );
-
-        if (result == JOptionPane.OK_OPTION) {
-            //item that are chosen from the combobox stored inside role
-            String selectedChoice = (String) roleCombo.getSelectedItem();
-
-            for (String choice : studentList) {
-                if (selectedChoice.equals(choice)) {
-                    System.out.println(choice + " selected");
-                    btn.setText(choice);
-                    //result = choice [choice = "Fatimah"]
-                    // openRoleScreen(role); // call function dynamically
-                    break;
-                }
-            }
-        }
-    }
-
     private void changeEvalName(JButton btn) {
 
     //convert the string into a combobox
     ArrayList<String> evaluatorList = new ArrayList<>();
-    evaluatorList.add("Ng Hu");
-    evaluatorList.add("Willie Poh");
-    evaluatorList.add("Farhah");
-    evaluatorList.add("Khairil");
-
+   for (int x = 1; x < DBHelper.getSessionCount(); x++) {
+        evaluatorList.add(DBHelper.getUserByRole("Evaluator",x ));
+    }
     // Convert ArrayList to array
     String[] evaluatorListArray = evaluatorList.toArray(new String[0]);
     JComboBox<String> roleCombo = new JComboBox<>(evaluatorListArray);

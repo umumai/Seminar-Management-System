@@ -401,6 +401,19 @@ public class DBHelper {
         return null;
     }
 
+    //update time slot
+    public static boolean updateTimeSlot(int timeSlot, String studentID) throws SQLException {
+    String sql = "UPDATE appointments SET time = ? WHERE student_id = ?";
+    
+    try (Connection conn = getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setInt(1, timeSlot);
+        ps.setString(2, studentID);
+        int affected = ps.executeUpdate();
+        return affected > 0;
+    }
+}
+
     // Get name from users table by role
     public static String getUserByRole(String role, int rowNumber) {
         String sql = "SELECT name FROM users WHERE role = ? LIMIT 1 OFFSET ?";
@@ -439,7 +452,27 @@ public class DBHelper {
 }
 
 
-    
+    public static User userData(String id) {
+    String sql = "SELECT id, name, role, password FROM users WHERE id = ?";
+    try (Connection conn = getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+
+        ps.setString(1, id);
+
+        try (ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                String name = rs.getString("name");
+                String role = rs.getString("role");
+                String password = rs.getString("password");
+                return new User(id, name, role, password); // Use 4-parameter constructor
+            }
+        }
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return null;
+}
 
     
 } 

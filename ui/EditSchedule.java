@@ -196,9 +196,8 @@ public class EditSchedule extends JPanel{
             for (String choice : studentList) {
                 if (selectedChoice.equals(choice)) {
                     System.out.println(choice + " selected");
+                    
                     btn.setText(choice);
-                    //result = choice [choice = "Fatimah"]
-                    // openRoleScreen(role); // call function dynamically
                     break;
                 }
             }
