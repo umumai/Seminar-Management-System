@@ -28,7 +28,7 @@ public class LoginFrame extends JFrame {
     public LoginFrame() {
         setTitle("Seminar Management System");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setSize(600, 400);
+        setSize(1000, 500);
         setLocationRelativeTo(null);
 
 

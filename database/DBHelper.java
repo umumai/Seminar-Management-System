@@ -371,6 +371,76 @@ public class DBHelper {
         return null;
     }
 
+    // Insert session_id and student_id into appointments table
+    public static boolean insertAppointment(int sessionId, String studentId) throws SQLException {
+        String sql = "INSERT INTO appointments(session_id, student_id) VALUES(?, ?)";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, sessionId);
+            ps.setString(2, studentId);
+            int affected = ps.executeUpdate();
+            return affected > 0;
+        }
+    }
+
+    // Get student_id from appointments table by sessionId and row number
+    public static String getStudentIdFromAppointment(int sessionId, int rowNumber) {
+        String sql = "SELECT student_id FROM appointments WHERE session_id = ? LIMIT 1 OFFSET ?";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, sessionId);
+            ps.setInt(2, rowNumber - 1);  // Start from 0
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("student_id");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // Get name from users table by role
+    public static String getUserByRole(String role, int rowNumber) {
+        String sql = "SELECT name FROM users WHERE role = ? LIMIT 1 OFFSET ?";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, role);
+            ps.setInt(2, rowNumber - 1);  // Start from 0
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("name");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    //check each existing row
+   public static boolean checkUserbyRow(int rowNumber) {
+    String sql = "SELECT 1 FROM users LIMIT 1 OFFSET ?";
+
+    try (Connection conn = getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+
+        ps.setInt(1, rowNumber - 1);
+        try (ResultSet rs = ps.executeQuery()) {
+            return rs.next();
+        }
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+
+    return false;
+}
+
+
+    
+
     
 } 
 

@@ -3,7 +3,7 @@ import Database.DBHelper;
 import java.awt.*;
 import java.sql.SQLException;
 import javax.swing.*;
-import models.Coordinator;
+import models.*;
 
 //dalam coordinator frame ni kita just place the JTabbedPane. 
 // and then we place the other frame (from other file) into each tabs
@@ -19,6 +19,8 @@ public class CoordinatorFrame extends JPanel {
     public CoordinatorFrame(JFrame frame, Coordinator coordinator) {
         this.frame = frame;
         this.currentUser = coordinator;
+        
+
         setLayout(new BorderLayout());
 
         //=================COORDINATOR SCREEN==================
@@ -39,7 +41,7 @@ public class CoordinatorFrame extends JPanel {
         JPanel centerPanel = new JPanel(new GridLayout(0,3,3,3));
         centerPanel.setBorder(BorderFactory.createEmptyBorder(110,50,140,50));
         centerPanel.setBackground(deepBlue);
-        JButton newSeminarBtn = createSeminarActionBtn("new Seminar",Color.white, Color.black);
+        JButton newSeminarBtn = createSeminarActionBtn("new Seminar");
         JButton studMngmentBtn = new JButton("student management");
         studMngmentBtn.addActionListener(e -> {
             ((LoginFrame) frame).showPanel("studManagementPanel");
@@ -78,7 +80,7 @@ public class CoordinatorFrame extends JPanel {
         JPanel centerPanel = new JPanel(new GridLayout(0,3,3,3));
         centerPanel.setBorder(BorderFactory.createEmptyBorder(110,50,140,50));
         centerPanel.setBackground(deepBlue);
-        JButton newSeminarBtn = createSeminarActionBtn("new Seminar",Color.white, Color.black);
+        JButton newSeminarBtn = createSeminarActionBtn("new Seminar");
         JButton studMngmentBtn = new JButton("student management");
         studMngmentBtn.addActionListener(e -> {
             ((LoginFrame) frame).showPanel("studManagementPanel");
@@ -140,10 +142,8 @@ public class CoordinatorFrame extends JPanel {
     }
 
     //GUI helper (reusable)
-    public JButton createSeminarActionBtn(String text, Color bgColor, Color textColor){
+    public JButton createSeminarActionBtn(String text){
         JButton btn = new JButton(text);
-        btn.setBackground(bgColor);
-        btn.setForeground(textColor);
         btn.setFocusPainted(false);
         // btn.setBorderPainted(true);
         btn.addActionListener(e -> {

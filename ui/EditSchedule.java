@@ -64,36 +64,38 @@ public class EditSchedule extends JPanel{
         JButton R1C3 = headerBox("Evaluator Name", Color.BLACK, Color.white);
         //9:00AM row
         JButton R2C1 = headerBox("9:00AM", Color.BLACK, Color.white);
-        JButton R2C2 = studentBox("", Color.white, Color.black);
+        JButton R2C2 = studentBox("", Color.white, Color.black, i);
         JButton R2C3 = evaluatorBox("", Color.white, Color.black);
         //10:00AM row
         JButton R3C1 = headerBox("10:00AM", Color.BLACK, Color.white);
-        JButton R3C2 = studentBox("", Color.white, Color.black);
+        JButton R3C2 = studentBox("", Color.white, Color.black, i);
         JButton R3C3 = evaluatorBox("", Color.white, Color.black);
         //11:00AM row
         JButton R4C1 = headerBox("11:00AM", Color.BLACK, Color.white);
-        JButton R4C2 = studentBox("", Color.white, Color.black);
+        JButton R4C2 = studentBox("", Color.white, Color.black, i);
         JButton R4C3 = evaluatorBox("", Color.white, Color.black);
         //12:00PM row
         JButton R5C1 = headerBox("12:00PM", Color.BLACK, Color.white);
-        JButton R5C2 = studentBox("", Color.white, Color.black);
+        JButton R5C2 = studentBox("", Color.white, Color.black, i);
         JButton R5C3 = evaluatorBox("", Color.white, Color.black);
         //1:00PM row
         JButton R6C1 = headerBox("1:00PM", Color.BLACK, Color.white);
-        JButton R6C2 = studentBox("", Color.white, Color.black);
+        JButton R6C2 = studentBox("", Color.white, Color.black, i);
         JButton R6C3 = evaluatorBox("", Color.white, Color.black);
         //2:00PM row
         JButton R7C1 = headerBox("2:00PM", Color.BLACK, Color.white);
-        JButton R7C2 = studentBox("", Color.white, Color.black);
+        JButton R7C2 = studentBox("", Color.white, Color.black, i);
         JButton R7C3 = evaluatorBox("", Color.white, Color.black);
         //3:00PM row
         JButton R8C1 = headerBox("3:00PM", Color.BLACK, Color.white);
-        JButton R8C2 = studentBox("", Color.white, Color.black);
+        JButton R8C2 = studentBox("", Color.white, Color.black, i);
         JButton R8C3 = evaluatorBox("", Color.white, Color.black);
         //4:00PM row
         JButton R9C1 = headerBox("4:00PM", Color.BLACK, Color.white);
-        JButton R9C2 = studentBox("", Color.white, Color.black);
+        JButton R9C2 = studentBox("", Color.white, Color.black, i);
         JButton R9C3 = evaluatorBox("", Color.white, Color.black);
+
+        if ((DBHelper.getStudentIdFromAppointment(i, 0)) != null){
 
         //add all the JButton into the table panel
         tablePanel.add(R1C1);
@@ -132,18 +134,20 @@ public class EditSchedule extends JPanel{
         tablePanel.add(R9C2);
         tablePanel.add(R9C3);
 
-
         JButton saveButton = buttonEdit();
-
         //bottom panel
         JPanel bottomPanel = new JPanel(new BorderLayout());
         bottomPanel.setBorder(BorderFactory.createEmptyBorder(0, 20, 10, 20));
         bottomPanel.add(saveButton,BorderLayout.EAST);        
+        mainPanel.add(bottomPanel, BorderLayout.SOUTH);
+        } else {
+            JLabel text = new JLabel("Timetable unavailable as student not registered to this seminar yet.");
+            tablePanel.add(text);
+        }  
 
             //add other panels to main Panel
             mainPanel.add(detailsPanel, BorderLayout.NORTH);
             mainPanel.add(tablePanel, BorderLayout.CENTER);
-            mainPanel.add(bottomPanel, BorderLayout.SOUTH);
             //mainPanel.add(label);
             //===========
             //add each tabs
@@ -156,21 +160,21 @@ public class EditSchedule extends JPanel{
     }
 
     //====================================================================================
-    private void changeStudName(JButton btn) {
+    private void changeStudName(JButton btn, int session) {
 
     //convert the string into a combobox
     ArrayList<String> studentList = new ArrayList<>();
-    studentList.add("Fatimah");
-    studentList.add("Ummu");
-    studentList.add("Nisah");
-    // later you can add more dynamically
-    studentList.add("Busyra");
+    //loop utk get each student inside the session
+    for (int x = 1; x < DBHelper.getSessionCount(); x++) {
+        studentList.add(DBHelper.getStudentNameById(DBHelper.getStudentIdFromAppointment(session, x)));
+    }
 
     // Convert ArrayList to array
     String[] studentListArray = studentList.toArray(new String[0]);
     JComboBox<String> roleCombo = new JComboBox<>(studentListArray);
 
     JPanel panel = new JPanel(new GridLayout(0, 1));
+    // if ((DBHelper.getStudentIdFromAppointment(session, 0)) != null){
     panel.add(new JLabel("Choose role:"));
     panel.add(roleCombo);
 
@@ -196,6 +200,9 @@ public class EditSchedule extends JPanel{
                 }
             }
         }
+    // } else {
+    //     JOptionPane.showMessageDialog(panel, "Error: No student registered in this session yet.");
+    // }
     }
 
     private void changeEvalName(JButton btn) {
@@ -251,7 +258,7 @@ public class EditSchedule extends JPanel{
         return btn;
     }
 
-    public JButton studentBox(String text, Color bgColor, Color textColor){
+    public JButton studentBox(String text, Color bgColor, Color textColor, int session){
         JButton btn = new JButton(text);
         btn.setBackground(bgColor);
         btn.setForeground(textColor);
@@ -259,7 +266,7 @@ public class EditSchedule extends JPanel{
         // btn.setBorderPainted(true);
         btn.addActionListener(e -> {
             if ("save".equals(state)) {
-                changeStudName(btn);
+                changeStudName(btn,session);
             }
         });
         return btn;

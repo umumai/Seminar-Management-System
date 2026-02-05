@@ -9,7 +9,8 @@ import models.Session;
 // and then we place the other frame (from other file) into each tabs
 public class StudMngmentFrame extends JPanel {
     private JFrame frame;
-    
+    private String students;
+    private String evaluators;
     String state = "edit";
     public Color deepBlue = new Color(14,69,128);
     
@@ -59,60 +60,95 @@ public class StudMngmentFrame extends JPanel {
         JPanel tablePanel = new JPanel(new GridLayout(9, 3, 1, 1));
         tablePanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
 
+        int counter = 1;
         //header row
-        JButton R1C1 = headerBox("Student ID", deepBlue, Color.white);
-        JButton R1C2 = headerBox("Student Name", deepBlue, Color.white);
-        JButton R1C3 = headerBox("Evaluator Name", deepBlue, Color.white);
-        JButton R1C4 = headerBox("Status", deepBlue, Color.white);
+        JButton R1C1 = box("Student ID", deepBlue, Color.white);
+        JButton R1C2 = box("Student Name", deepBlue, Color.white);
+        JButton R1C3 = box("Evaluator Name", deepBlue, Color.white);
+        JButton R1C4 = box("Status", deepBlue, Color.white);
 
         //1st student
-        JButton R2C1 = headerBox("0001", deepBlue, Color.white);
-        JButton R2C2 = studentBox("", Color.white, deepBlue);
+        
+        JButton R2C1 = box(DBHelper.getStudentIdFromAppointment(i,counter), deepBlue, Color.white);
+        JButton R2C2 = studentBox(DBHelper.getStudentNameById(DBHelper.getStudentIdFromAppointment(i,counter)), Color.white, deepBlue);
         JButton R2C3 = evaluatorBox("", Color.white, deepBlue);
         JButton R2C4 = statusBox("", Color.white, deepBlue);
+        if ((DBHelper.getStudentIdFromAppointment(i,counter)) != null ){
+            R2C4.setText("pending");
+        }
+        counter++;
 
         //2nd student
-        JButton R3C1 = headerBox("0002", deepBlue, Color.white);
-        JButton R3C2 = studentBox("", Color.white, deepBlue);
+        JButton R3C1 = box(DBHelper.getStudentIdFromAppointment(i,counter), deepBlue, Color.white);
+        JButton R3C2 = studentBox(DBHelper.getStudentNameById(DBHelper.getStudentIdFromAppointment(i,counter)), Color.white, deepBlue);
         JButton R3C3 = evaluatorBox("", Color.white, deepBlue);
         JButton R3C4 = statusBox("", Color.white, deepBlue);
+        if ((DBHelper.getStudentIdFromAppointment(i,counter++)) != null ){
+            R3C4.setText("pending");
+        }
+        counter++;
 
         //3rd student
-        JButton R4C1 = headerBox("", deepBlue, Color.white);
-        JButton R4C2 = studentBox("", Color.white, deepBlue);
+        JButton R4C1 = box(DBHelper.getStudentIdFromAppointment(i,counter), deepBlue, Color.white);
+        JButton R4C2 = studentBox(DBHelper.getStudentNameById(DBHelper.getStudentIdFromAppointment(i,counter)), Color.white, deepBlue);
         JButton R4C3 = evaluatorBox("", Color.white, deepBlue);
         JButton R4C4 = statusBox("", Color.white, deepBlue);
+        if ((DBHelper.getStudentIdFromAppointment(i,counter)) != null ){
+            R4C4.setText("pending");
+        }
+        counter++;
 
         //4th student
-        JButton R5C1 = headerBox("", deepBlue, Color.white);
-        JButton R5C2 = studentBox("", Color.white, deepBlue);
+        JButton R5C1 = box(DBHelper.getStudentIdFromAppointment(i,counter), deepBlue, Color.white);
+        JButton R5C2 = studentBox(DBHelper.getStudentNameById(DBHelper.getStudentIdFromAppointment(i,counter)), Color.white, deepBlue);
         JButton R5C3 = evaluatorBox("", Color.white, deepBlue);
         JButton R5C4 = statusBox("", Color.white, deepBlue);
+        if ((DBHelper.getStudentIdFromAppointment(i,counter)) != null ){
+            R5C4.setText("pending");
+        }
+        counter++;
 
         //5th student
-        JButton R6C1 = headerBox("", deepBlue, Color.white);
-        JButton R6C2 = studentBox("", Color.white, deepBlue);
+        JButton R6C1 = box(DBHelper.getStudentIdFromAppointment(i,counter), deepBlue, Color.white);
+        JButton R6C2 = studentBox(DBHelper.getStudentNameById(DBHelper.getStudentIdFromAppointment(i,counter)), Color.white, deepBlue);
         JButton R6C3 = evaluatorBox("", Color.white, deepBlue);
         JButton R6C4 = statusBox("", Color.white, deepBlue);
+        if ((DBHelper.getStudentIdFromAppointment(i,counter)) != null ){
+            R6C4.setText("pending");
+        }
+        counter++;
 
         //6th student
-        JButton R7C1 = headerBox("", deepBlue, Color.white);
-        JButton R7C2 = studentBox("", Color.white, deepBlue);
+        JButton R7C1 = box(DBHelper.getStudentIdFromAppointment(i,counter), deepBlue, Color.white);
+        JButton R7C2 = studentBox(DBHelper.getStudentNameById(DBHelper.getStudentIdFromAppointment(i,counter)), Color.white, deepBlue);
         JButton R7C3 = evaluatorBox("", Color.white, deepBlue);
         JButton R7C4 = statusBox("", Color.white, deepBlue);
+        if ((DBHelper.getStudentIdFromAppointment(i,counter)) != null ){
+            R7C4.setText("pending");
+        }
+        counter++;
 
         //7th student
-        JButton R8C1 = headerBox("", deepBlue, Color.white);
-        JButton R8C2 = studentBox("", Color.white, deepBlue);
+        JButton R8C1 = box(DBHelper.getStudentIdFromAppointment(i,counter), deepBlue, Color.white);
+        JButton R8C2 = studentBox(DBHelper.getStudentNameById(DBHelper.getStudentIdFromAppointment(i,counter)), Color.white, deepBlue);
         JButton R8C3 = evaluatorBox("", Color.white, deepBlue);
         JButton R8C4 = statusBox("", Color.white, deepBlue);
+        if ((DBHelper.getStudentIdFromAppointment(i,counter)) != null ){
+            R8C4.setText("pending");
+        }
+        counter++;
 
         //8th student
-        JButton R9C1 = headerBox("", deepBlue, Color.white);
-        JButton R9C2 = studentBox("", Color.white, deepBlue);
+        JButton R9C1 = box(DBHelper.getStudentIdFromAppointment(i,counter), deepBlue, Color.white);
+        JButton R9C2 = studentBox(DBHelper.getStudentNameById(DBHelper.getStudentIdFromAppointment(i,counter)), Color.white, deepBlue);
         JButton R9C3 = evaluatorBox("", Color.white, deepBlue);
         JButton R9C4 = statusBox("", Color.white, deepBlue);
+        if ((DBHelper.getStudentIdFromAppointment(i,counter)) != null ){
+            R5C4.setText("pending");
+        }
 
+
+        if ((DBHelper.getStudentIdFromAppointment(i, 0)) != null){
 
         //add all the JButton into the table panel
         tablePanel.add(R1C1);
@@ -159,19 +195,22 @@ public class StudMngmentFrame extends JPanel {
         tablePanel.add(R9C2);
         tablePanel.add(R9C3);
         tablePanel.add(R9C4);
-
-
         JButton saveButton = buttonEdit();
-
         //bottom panel
         JPanel bottomPanel = new JPanel(new BorderLayout());
         bottomPanel.setBorder(BorderFactory.createEmptyBorder(0, 20, 10, 20));
         bottomPanel.add(saveButton,BorderLayout.EAST);        
+        mainPanel.add(bottomPanel, BorderLayout.SOUTH);
+        } else {
+            JLabel text = new JLabel("Information unavailable as student not registered to this seminar yet.");
+            tablePanel.add(text);
+        }
+
+
 
             //add other panels to main Panel
             mainPanel.add(detailsPanel, BorderLayout.NORTH);
             mainPanel.add(tablePanel, BorderLayout.CENTER);
-            mainPanel.add(bottomPanel, BorderLayout.SOUTH);
             //mainPanel.add(label);
             //===========
             //add each tabs
@@ -186,12 +225,20 @@ public class StudMngmentFrame extends JPanel {
     //====================================================================================
     private void changeStudName(JButton btn) {
 
-    //convert the string into a combobox
     ArrayList<String> studentList = new ArrayList<>();
-    studentList.add("Fatimah");
-    studentList.add("Ummu");
-    studentList.add("Nisah");
-    studentList.add("Busyra");
+
+    // for (int x = 1; x < 10; x++) {
+    //     // if ((DBHelper.checkUserbyRow(x))){
+    //     //     studentList.add(DBHelper.getUserByRole("STUDENT",x));
+    //     //     evaluators = DBHelper.getUserByRole("Evaluator",x);
+    //     // }
+    //     //convert the string into a combobox
+    //     // studentList.add("Fatimah");
+    //     // studentList.add("Ummu");
+    //     // studentList.add("Nisah");
+    //     // studentList.add("Busyra");
+        
+    // }
 
     // Convert ArrayList to array
     String[] studentListArray = studentList.toArray(new String[0]);
@@ -267,7 +314,7 @@ public class StudMngmentFrame extends JPanel {
     }
 
 
-    public JButton headerBox(String text, Color bgColor, Color textColor){
+    public JButton box(String text, Color bgColor, Color textColor){
         JButton btn = new JButton(text);
         btn.setBackground(bgColor);
         btn.setForeground(textColor);
@@ -283,11 +330,6 @@ public class StudMngmentFrame extends JPanel {
         btn.setForeground(textColor);
         btn.setFocusPainted(false);
         // btn.setBorderPainted(true);
-        btn.addActionListener(e -> {
-            if ("save".equals(state)) {
-                changeStudName(btn);
-            }
-        });
         return btn;
     }
 
