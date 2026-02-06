@@ -1,21 +1,28 @@
 package models;
 
 public class Appointment {
-    private final String sessionID;
+    private final int sessionID;
     private final String studentID;
-    private final String evaluatorID;
-    private final int timeSlot;
+    private String evaluatorID;
+    private int timeSlot;
+    private String status;
 
-    public Appointment(String sessionID, String studentID, String evaluatorID, int timeSlot){
+    public Appointment(int sessionID, String studentID, String evaluatorID, int timeSlot, String status){
         this.sessionID = sessionID;
         this.studentID = studentID;
         this.evaluatorID = evaluatorID;
         this.timeSlot = timeSlot;
+        this.status = status;
     }
 
-    public String getSessionID() { return sessionID;}
+    public int getSessionID() { return sessionID;}
     public String getStudentID() { return studentID;}
     public String getEvaluatorID() { return evaluatorID;}
     public int gettimeSlot() { return timeSlot;}
-    
+    public String getStatus() { return status; }
+
+    public void setEvaluatorID(String evaluatorID) { this.evaluatorID = evaluatorID; }
+    public void setTimeSlot(int timeSlot) { this.timeSlot = timeSlot; }
+    public void setStatus(String status) { this.status = status; }
+
 }

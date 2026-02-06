@@ -16,6 +16,18 @@ public class EditSchedule extends JPanel{
         setLayout(new BorderLayout());
         setBackground(deepBlue);
 
+        // Create Appointment objects for each appointment_id in the database
+        // List<Appointment> apptList = DBHelper.getAppointmentsbySession(i);
+        // System.err.println("DEBUG : Total appointments loaded = " + allAppointments.size());
+        // for (Appointment appointment : allAppointments) {
+        //     System.err.println("DEBUG : Appointment - SessionID: " + appointment.getSessionID() + 
+        //                      ", StudentID: " + appointment.getStudentID() + 
+        //                      ", EvaluatorID: " + appointment.getEvaluatorID() + 
+        //                      ", TimeSlot: " + appointment.gettimeSlot());
+        // }
+
+        // String evaluatorId = allAppointments.get(0).getEvaluatorID();
+
         JPanel topPanel = new JPanel(new BorderLayout());
         //topPanel.setBackground(beige);
         topPanel.setBorder(BorderFactory.createEmptyBorder(5,15,5,5));
@@ -27,19 +39,11 @@ public class EditSchedule extends JPanel{
         topPanel.add(coordinatorLabel,BorderLayout.WEST);
         topPanel.add(returnButton,BorderLayout.EAST);
 
-        //datas
-        ArrayList<String> dateList = new ArrayList<>();
-        dateList.add("12-OCT-2025");
-        dateList.add("28-JAN-2026");
-        dateList.add("3-FEB-2026");
-        // later you can add more dynamically
-        dateList.add("date");
-
         //panels are stored inside tabbedPane
         JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.LEFT);
         //configure how many session exist
         int sessionList = DBHelper.getSessionCount();
-        System.err.println("DEBUG : Total session exist = " + sessionList);
+        System.err.println("DEBUG : Total session exist in edit schedule = " + sessionList);
         for (int i = 1; i <= sessionList; i++) {
             JPanel mainPanel = new JPanel(new BorderLayout());
             //adjust the tab name here
@@ -52,7 +56,7 @@ public class EditSchedule extends JPanel{
         detailsPanel.setBorder(BorderFactory.createEmptyBorder(10, 30, 10, 10));
         detailsPanel.add(new JLabel("Date : " + session.getDate()));
         detailsPanel.add(new JLabel("Venue : " + session.getVenue()));
-        detailsPanel.add(new JLabel("Presentation Type : " + session.getSessionType()));
+        // detailsPanel.add(new JLabel("Presentation Type : " + session.getSessionType()));
         
         //table panel
         JPanel tablePanel = new JPanel(new GridLayout(9, 3, 1, 1));
