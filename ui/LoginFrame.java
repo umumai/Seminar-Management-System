@@ -12,8 +12,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
-import models.User;
 import models.Coordinator;
+import models.User;
 import util.TestDevMode;
 
 public class LoginFrame extends JFrame {
@@ -24,6 +24,7 @@ public class LoginFrame extends JFrame {
     private StudentPanel studentPanelInstance; // for multi-user support instead of static methods. Also better isolation code
     private User currentUser; // Store authenticated user
     private CoordinatorFrame coordinatorPanelInstance; // Cache for coordinator panel
+    private JPanel editSchedulePanelInstance;
 
     public LoginFrame() {
         setTitle("Seminar Management System");
@@ -47,7 +48,7 @@ public class LoginFrame extends JFrame {
         JPanel evaluatorPanel = EvaluatorPanel.createPanel(this);
         JPanel registerPanel = StudentRegisterPanel.createPanel(this);
         JPanel scheduleFrame = new ScheduleFrame(this);
-        JPanel editSchedulePanel = new EditSchedule(this);
+        editSchedulePanelInstance = new EditSchedule(this);
         JPanel reportPanel = new ReportFrame(this);
         JPanel studManagementPanel = new StudMngmentFrame(this);
 
@@ -59,7 +60,7 @@ public class LoginFrame extends JFrame {
         mainPanel.add(evaluatorPanel, "EvaluatorPanel");
         mainPanel.add(registerPanel, "RegisterPanel");
         mainPanel.add(scheduleFrame, "schedulePanel");
-        mainPanel.add(editSchedulePanel, "editSchedulePanel");
+        mainPanel.add(editSchedulePanelInstance, "editSchedulePanel");
         mainPanel.add(reportPanel, "reportPanel");
         mainPanel.add(studManagementPanel, "studManagementPanel");
 
@@ -142,7 +143,6 @@ public class LoginFrame extends JFrame {
 
             case "COORDINATOR":
                 // Update coordinator panel with authenticated user - convert to Coordinator
-                System.out.println("DEBUG: Switching to COORDINATOR panel"); // Debug
                 Coordinator coordinator = new Coordinator(u.getId(), u.getName());
                 coordinatorPanelInstance.updateUser(coordinator);
                 cardLayout.show(mainPanel, "CoordinatorPanel");
@@ -171,6 +171,13 @@ public class LoginFrame extends JFrame {
     }
 
     public void showPanel(String panelName) {
+        if ("editSchedulePanel".equals(panelName)) {
+            mainPanel.remove(editSchedulePanelInstance);
+            editSchedulePanelInstance = new EditSchedule(this);
+            mainPanel.add(editSchedulePanelInstance, "editSchedulePanel");
+            mainPanel.revalidate();
+            mainPanel.repaint();
+        }
         cardLayout.show(mainPanel, panelName);
     }
     

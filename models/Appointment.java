@@ -4,10 +4,10 @@ public class Appointment {
     private final int sessionID;
     private final String studentID;
     private String evaluatorID;
-    private int timeSlot;
+    private String timeSlot;
     private String status;
 
-    public Appointment(int sessionID, String studentID, String evaluatorID, int timeSlot, String status){
+    public Appointment(int sessionID, String studentID, String evaluatorID, String timeSlot, String status){
         this.sessionID = sessionID;
         this.studentID = studentID;
         this.evaluatorID = evaluatorID;
@@ -18,11 +18,11 @@ public class Appointment {
     public int getSessionID() { return sessionID;}
     public String getStudentID() { return studentID;}
     public String getEvaluatorID() { return evaluatorID;}
-    public int gettimeSlot() { return timeSlot;}
+    public String getTimeSlot() { return timeSlot;}
     public String getStatus() { return status; }
 
     public void setEvaluatorID(String evaluatorID) { this.evaluatorID = evaluatorID; }
-    public void setTimeSlot(int timeSlot) { this.timeSlot = timeSlot; }
+    public void setTimeSlot(String timeSlot) { this.timeSlot = timeSlot; }
     public void setStatus(String status) { this.status = status; }
 
 }

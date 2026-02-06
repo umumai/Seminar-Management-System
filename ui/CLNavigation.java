@@ -10,7 +10,6 @@ public class CLNavigation extends JFrame {
 
     public CLNavigation() {
         setTitle("Seminar Management System");
-        setSize(600, 400);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
         cardLayout = new CardLayout();
@@ -22,7 +21,7 @@ public class CLNavigation extends JFrame {
         // // Create screens
         EditSchedule editScheduleFrame = new EditSchedule(this);
         ScheduleFrame viewScheduleFrame = new ScheduleFrame(this);
-        CoordinatorFrame coordinatorFrame = new CoordinatorFrame(this);
+        CoordinatorFrame coordinatorFrame = new CoordinatorFrame(this, null);
         StudMngmentFrame studMngmentFrame = new StudMngmentFrame(this);
         ReportFrame reportFrame = new ReportFrame(this);
         // LoginFrame loginFrame = new LoginFrame(this);

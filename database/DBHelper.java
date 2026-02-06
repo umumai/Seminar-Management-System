@@ -372,12 +372,13 @@ public class DBHelper {
 
     // Insert session_id and student_id into appointments table
     public static boolean insertAppointment(int sessionId, String studentId) throws SQLException {
-        String sql = "INSERT INTO appointments(session_id, student_id, status) VALUES(?, ?, ?)";
+        String sql = "INSERT INTO appointments(session_id, student_id, time, status) VALUES(?, ?, ?, ?)";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, sessionId);
             ps.setString(2, studentId);
-            ps.setString(3, "pending evaluator");
+            ps.setString(3, "0");
+            ps.setString(4, "pending evaluator");
             int affected = ps.executeUpdate();
             return affected > 0;
         }
@@ -416,7 +417,7 @@ public class DBHelper {
                 while (rs.next()) {
                     String studentId = rs.getString("student_id");
                     String evaluatorId = rs.getString("evaluator_id");
-                    int timeSlot = rs.getInt("time");
+                    String timeSlot = rs.getString("time");
                     String status = rs.getString("status");
                     appointments.add(new Appointment(sessionID, studentId, evaluatorId, timeSlot, status));
                 }
@@ -426,28 +427,6 @@ public class DBHelper {
         }
         return appointments;
     }
-
-    // // Create a new appointment and return it
-    // public static Appointment setupAppointment(String studentId) throws SQLException {
-    //     String sql = "SELECT sesion_id, student_id, evaluator_id, time, status FROM appointments WHERE student_id = ?";
-    //     try (Connection conn = getConnection();
-    //          PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-    //         ps.setString(1, studentId);
-    //         try (ResultSet rs = ps.executeQuery()) {
-    //         if (rs.next()) {
-    //             String session_id = rs.getString("session_id");
-    //             String evaluator_id = rs.getString("evaluator_id");
-    //             int time = rs.getInt("time");
-    //             String status = rs.getString("status");
-    //             return new Appointment(session_id,studentId,evaluator_id,time,status); 
-    //         }
-    //     }
-
-    // } catch (SQLException e) {
-    //     e.printStackTrace();
-    // }
-    // return null;
-    // }
 
     // Get student_id from appointments table by sessionId and row number
     public static String getStudentIdFromAppointment(int sessionId, int rowNumber) {
@@ -468,12 +447,12 @@ public class DBHelper {
     }
 
     //update time slot
-    public static boolean updateTimeSlot(int timeSlot, String studentID) throws SQLException {
+    public static boolean updateTimeSlot(String timeSlot, String studentID) throws SQLException {
     String sql = "UPDATE appointments SET time = ? WHERE student_id = ?";
     
     try (Connection conn = getConnection();
          PreparedStatement ps = conn.prepareStatement(sql)) {
-        ps.setInt(1, timeSlot);
+        ps.setString(1, timeSlot);
         ps.setString(2, studentID);
         int affected = ps.executeUpdate();
         return affected > 0;
@@ -575,13 +554,14 @@ public class DBHelper {
     }
 
      // Update evaluator and status by appointment_id
-    public static boolean updateAppointment(String studentID, String evaluatorId, String status) throws SQLException {
-        String sql = "UPDATE appointments SET evaluator_id = ?, status = ? WHERE student_id = ?";
+    public static boolean updateAppointment(String studentID, String evaluatorId, String time, String status) throws SQLException {
+        String sql = "UPDATE appointments SET evaluator_id = ?, time = ? , status = ? WHERE student_id = ?";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, evaluatorId);
-            ps.setString(2, status);
-            ps.setString(3, studentID);
+            ps.setString(2, time);
+            ps.setString(3, status);
+            ps.setString(4, studentID);
             int affected = ps.executeUpdate();
             return affected > 0;
         }
