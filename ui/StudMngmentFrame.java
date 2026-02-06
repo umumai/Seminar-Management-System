@@ -1,9 +1,11 @@
 package ui;
 import Database.DBHelper;
 import java.awt.*;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 import javax.swing.*;
-import models.Session;
+import models.*;
 
 //dalam coordinator frame ni kita just place the JTabbedPane. 
 // and then we place the other frame (from other file) into each tabs
@@ -19,6 +21,8 @@ public class StudMngmentFrame extends JPanel {
         this.frame=frame;
         setLayout(new BorderLayout());
 
+        
+
         //top Panel
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setBorder(BorderFactory.createEmptyBorder(5,15,5,5));
@@ -28,25 +32,30 @@ public class StudMngmentFrame extends JPanel {
         topPanel.add(coordinatorLabel,BorderLayout.WEST);
         topPanel.add(returnButton,BorderLayout.EAST);
 
-        //datas
-        ArrayList<String> dateList = new ArrayList<>();
-        dateList.add("12-OCT-2025");
-        dateList.add("28-JAN-2026");
-        dateList.add("3-FEB-2026");
-        // later you can add more dynamically
-        dateList.add("date");
 
         //panels are stored inside tabbedPane
         JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.LEFT);
-        //configure how many session exist
+        //check how many session exist
         int sessionList = DBHelper.getSessionCount();
-        System.err.println("DEBUG : Total session exist = " + sessionList);
+        System.err.println("DEBUG : Total session exist in studmanagement = " + sessionList);
         for (int i = 1; i <= sessionList; i++) {
             JPanel mainPanel = new JPanel(new BorderLayout());
+            // Create Appointment objects for each appointment_id in the database
+            List<Appointment> apptList = DBHelper.getAppointmentsbySession(i);
+            //DEBUG
+            System.err.println("DEBUG : Total appointments exist in session " + i + " = " + apptList.size());
+            for (Appointment appointment : apptList) {
+                System.err.println("DEBUG : Appointment - SessionID: " + appointment.getSessionID() + 
+                ", StudentID: " + appointment.getStudentID() + 
+                ", EvaluatorID: " + appointment.getEvaluatorID() + 
+                ", TimeSlot: " + appointment.gettimeSlot());
+            }
             //adjust the tab name here
             String tabsName = "Session " + i;
 
             Session session = DBHelper.getSession(i);
+
+
             //create stuffs here==========
             
         
@@ -54,13 +63,12 @@ public class StudMngmentFrame extends JPanel {
         detailsPanel.setBorder(BorderFactory.createEmptyBorder(10, 30, 10, 10));
         detailsPanel.add(new JLabel("Date : " + session.getDate()));
         detailsPanel.add(new JLabel("Venue : " + session.getVenue()));
-        detailsPanel.add(new JLabel("Presentation Type : " + session.getSessionType()));
+        // detailsPanel.add(new JLabel("Presentation Type : " + session.getSessionType()));
         
         //table panel
         JPanel tablePanel = new JPanel(new GridLayout(9, 3, 1, 1));
         tablePanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
 
-        int counter = 1;
         //header row
         JButton R1C1 = box("Student ID", deepBlue, Color.white);
         JButton R1C2 = box("Student Name", deepBlue, Color.white);
@@ -68,83 +76,146 @@ public class StudMngmentFrame extends JPanel {
         JButton R1C4 = box("Status", deepBlue, Color.white);
 
         //1st student
-        
-        JButton R2C1 = box(DBHelper.getStudentIdFromAppointment(i,counter), deepBlue, Color.white);
-        JButton R2C2 = studentBox(DBHelper.getStudentNameById(DBHelper.getStudentIdFromAppointment(i,counter)), Color.white, deepBlue);
-        JButton R2C3 = evaluatorBox("", Color.white, deepBlue);
+        JButton R2C1 = box("", deepBlue, Color.white);
+        JButton R2C2 = studentBox("", Color.white, deepBlue);
+        JButton R2C3 = studentBox("", Color.white, deepBlue);
         JButton R2C4 = statusBox("", Color.white, deepBlue);
-        if ((DBHelper.getStudentIdFromAppointment(i,counter)) != null ){
-            R2C4.setText("pending");
+        if (apptList.size() > 0 && apptList.get(0) != null){
+            Appointment currentAppt = apptList.get(0);
+            System.err.println("DEBUG : 1st person in appointment " + currentAppt.getSessionID() + " = " +  
+                ", StudentID: " + currentAppt.getStudentID() + 
+                ", EvaluatorID: " + currentAppt.getEvaluatorID() + 
+                ", TimeSlot: " + currentAppt.gettimeSlot());
+            R2C1.setText(currentAppt.getStudentID());
+            R2C2.setText(DBHelper.getNameByID(currentAppt.getStudentID()));
+            if ((currentAppt.getEvaluatorID()) != null){
+                R2C3.setText(DBHelper.getNameByID(currentAppt.getEvaluatorID()));
+            } else {
+                R2C3.addActionListener(e->{changeEvalName(R2C3, currentAppt);});
+            }
+            R2C4.setText(currentAppt.getStatus());
         }
-        counter++;
 
-        //2nd student
-        JButton R3C1 = box(DBHelper.getStudentIdFromAppointment(i,counter), deepBlue, Color.white);
-        JButton R3C2 = studentBox(DBHelper.getStudentNameById(DBHelper.getStudentIdFromAppointment(i,counter)), Color.white, deepBlue);
-        JButton R3C3 = evaluatorBox("", Color.white, deepBlue);
+        JButton R3C1 = box("", deepBlue, Color.white);
+        JButton R3C2 = studentBox("", Color.white, deepBlue);
+        JButton R3C3 = studentBox("", Color.white, deepBlue);
         JButton R3C4 = statusBox("", Color.white, deepBlue);
-        if ((DBHelper.getStudentIdFromAppointment(i,counter++)) != null ){
-            R3C4.setText("pending");
+        if (apptList.size() > 1 && apptList.get(1) != null){
+            Appointment currentAppt = apptList.get(1);
+            System.err.println("DEBUG : 2nd person in appointment " + currentAppt.getSessionID() + " = " +  
+                ", StudentID: " + currentAppt.getStudentID() + 
+                ", EvaluatorID: " + currentAppt.getEvaluatorID() + 
+                ", TimeSlot: " + currentAppt.gettimeSlot());
+            R3C1.setText(currentAppt.getStudentID());
+            R3C2.setText(DBHelper.getNameByID(currentAppt.getStudentID()));
+            if ((currentAppt.getEvaluatorID()) != null){
+                R3C3.setText(DBHelper.getNameByID(currentAppt.getEvaluatorID()));
+            } else {
+                R3C3.addActionListener(e->{changeEvalName(R3C3, currentAppt);});
+            }
+            R3C4.setText(currentAppt.getStatus());
         }
-        counter++;
 
-        //3rd student
-        JButton R4C1 = box(DBHelper.getStudentIdFromAppointment(i,counter), deepBlue, Color.white);
-        JButton R4C2 = studentBox(DBHelper.getStudentNameById(DBHelper.getStudentIdFromAppointment(i,counter)), Color.white, deepBlue);
-        JButton R4C3 = evaluatorBox("", Color.white, deepBlue);
+        //11:00AM row
+        JButton R4C1 = box("", deepBlue, Color.white);
+        JButton R4C2 = studentBox("", Color.white, deepBlue);
+        JButton R4C3 = studentBox("", Color.white, deepBlue);
         JButton R4C4 = statusBox("", Color.white, deepBlue);
-        if ((DBHelper.getStudentIdFromAppointment(i,counter)) != null ){
-            R4C4.setText("pending");
+        if (apptList.size() > 2 && apptList.get(2) != null){
+            Appointment currentAppt = apptList.get(2);
+            R4C1.setText(currentAppt.getStudentID());
+            R4C2.setText(DBHelper.getNameByID(currentAppt.getStudentID()));
+            if ((currentAppt.getEvaluatorID()) != null){
+                R4C3.setText(DBHelper.getNameByID(currentAppt.getEvaluatorID()));
+            } else {
+                R4C3.addActionListener(e->{changeEvalName(R4C3, currentAppt);});
+            }
+            R4C4.setText(currentAppt.getStatus());
         }
-        counter++;
 
-        //4th student
-        JButton R5C1 = box(DBHelper.getStudentIdFromAppointment(i,counter), deepBlue, Color.white);
-        JButton R5C2 = studentBox(DBHelper.getStudentNameById(DBHelper.getStudentIdFromAppointment(i,counter)), Color.white, deepBlue);
-        JButton R5C3 = evaluatorBox("", Color.white, deepBlue);
+        //12:00PM row
+        JButton R5C1 = box("", deepBlue, Color.white);
+        JButton R5C2 = studentBox("", Color.white, deepBlue);
+        JButton R5C3 = studentBox("", Color.white, deepBlue);
         JButton R5C4 = statusBox("", Color.white, deepBlue);
-        if ((DBHelper.getStudentIdFromAppointment(i,counter)) != null ){
-            R5C4.setText("pending");
+        if (apptList.size() > 3 && apptList.get(3) != null){
+            Appointment currentAppt = apptList.get(3);
+            R5C1.setText(currentAppt.getStudentID());
+            R5C2.setText(DBHelper.getNameByID(currentAppt.getStudentID()));
+            if ((currentAppt.getEvaluatorID()) != null){
+                R5C3.setText(DBHelper.getNameByID(currentAppt.getEvaluatorID()));
+            } else {
+                R5C3.addActionListener(e->{changeEvalName(R5C3, currentAppt);});
+            }
+            R5C4.setText(currentAppt.getStatus());
         }
-        counter++;
 
-        //5th student
-        JButton R6C1 = box(DBHelper.getStudentIdFromAppointment(i,counter), deepBlue, Color.white);
-        JButton R6C2 = studentBox(DBHelper.getStudentNameById(DBHelper.getStudentIdFromAppointment(i,counter)), Color.white, deepBlue);
-        JButton R6C3 = evaluatorBox("", Color.white, deepBlue);
+        //1:00PM row
+        JButton R6C1 = box("", deepBlue, Color.white);
+        JButton R6C2 = studentBox("", Color.white, deepBlue);
+        JButton R6C3 = studentBox("", Color.white, deepBlue);
         JButton R6C4 = statusBox("", Color.white, deepBlue);
-        if ((DBHelper.getStudentIdFromAppointment(i,counter)) != null ){
-            R6C4.setText("pending");
+        if (apptList.size() > 4 && apptList.get(4) != null){
+            Appointment currentAppt = apptList.get(4);
+            R6C1.setText(currentAppt.getStudentID());
+            R6C2.setText(DBHelper.getNameByID(currentAppt.getStudentID()));
+            if ((currentAppt.getEvaluatorID()) != null){
+                R6C3.setText(DBHelper.getNameByID(currentAppt.getEvaluatorID()));
+            } else {
+                R6C3.addActionListener(e->{changeEvalName(R6C3, currentAppt);});
+            }
+            R6C4.setText(currentAppt.getStatus());
         }
-        counter++;
 
-        //6th student
-        JButton R7C1 = box(DBHelper.getStudentIdFromAppointment(i,counter), deepBlue, Color.white);
-        JButton R7C2 = studentBox(DBHelper.getStudentNameById(DBHelper.getStudentIdFromAppointment(i,counter)), Color.white, deepBlue);
-        JButton R7C3 = evaluatorBox("", Color.white, deepBlue);
+        //2:00PM row
+        JButton R7C1 = box("", deepBlue, Color.white);
+        JButton R7C2 = studentBox("", Color.white, deepBlue);
+        JButton R7C3 = studentBox("", Color.white, deepBlue);
         JButton R7C4 = statusBox("", Color.white, deepBlue);
-        if ((DBHelper.getStudentIdFromAppointment(i,counter)) != null ){
-            R7C4.setText("pending");
+        if (apptList.size() > 5 && apptList.get(5) != null){
+            Appointment currentAppt = apptList.get(5);
+            R7C1.setText(currentAppt.getStudentID());
+            R7C2.setText(DBHelper.getNameByID(currentAppt.getStudentID()));
+            if ((currentAppt.getEvaluatorID()) != null){
+                R7C3.setText(DBHelper.getNameByID(currentAppt.getEvaluatorID()));
+            } else {
+                R7C3.addActionListener(e->{changeEvalName(R7C3, currentAppt);});
+            }
+            R7C4.setText(currentAppt.getStatus());
         }
-        counter++;
 
-        //7th student
-        JButton R8C1 = box(DBHelper.getStudentIdFromAppointment(i,counter), deepBlue, Color.white);
-        JButton R8C2 = studentBox(DBHelper.getStudentNameById(DBHelper.getStudentIdFromAppointment(i,counter)), Color.white, deepBlue);
-        JButton R8C3 = evaluatorBox("", Color.white, deepBlue);
+        //3:00PM row
+        JButton R8C1 = box("", deepBlue, Color.white);
+        JButton R8C2 = studentBox("", Color.white, deepBlue);
+        JButton R8C3 = studentBox("", Color.white, deepBlue);
         JButton R8C4 = statusBox("", Color.white, deepBlue);
-        if ((DBHelper.getStudentIdFromAppointment(i,counter)) != null ){
-            R8C4.setText("pending");
+        if (apptList.size() > 6 && apptList.get(6) != null){
+            Appointment currentAppt = apptList.get(6);
+            R8C1.setText(currentAppt.getStudentID());
+            R8C2.setText(DBHelper.getNameByID(currentAppt.getStudentID()));
+            if ((currentAppt.getEvaluatorID()) != null){
+                R8C3.setText(DBHelper.getNameByID(currentAppt.getEvaluatorID()));
+            } else {
+                R8C3.addActionListener(e->{changeEvalName(R8C3, currentAppt);});
+            }
+            R8C4.setText(currentAppt.getStatus());
         }
-        counter++;
 
-        //8th student
-        JButton R9C1 = box(DBHelper.getStudentIdFromAppointment(i,counter), deepBlue, Color.white);
-        JButton R9C2 = studentBox(DBHelper.getStudentNameById(DBHelper.getStudentIdFromAppointment(i,counter)), Color.white, deepBlue);
-        JButton R9C3 = evaluatorBox("", Color.white, deepBlue);
+        //4:00PM row
+        JButton R9C1 = box("", deepBlue, Color.white);
+        JButton R9C2 = studentBox("", Color.white, deepBlue);
+        JButton R9C3 = studentBox("", Color.white, deepBlue);
         JButton R9C4 = statusBox("", Color.white, deepBlue);
-        if ((DBHelper.getStudentIdFromAppointment(i,counter)) != null ){
-            R5C4.setText("pending");
+        if (apptList.size() > 7 && apptList.get(7) != null){
+            Appointment currentAppt = apptList.get(7);
+            R9C1.setText(currentAppt.getStudentID());
+            R9C2.setText(DBHelper.getNameByID(currentAppt.getStudentID()));
+            if ((currentAppt.getEvaluatorID()) != null){
+                R9C3.setText(DBHelper.getNameByID(currentAppt.getEvaluatorID()));
+            } else {
+                R9C3.addActionListener(e->{changeEvalName(R9C3, currentAppt);});
+            }
+            R9C4.setText(currentAppt.getStatus());
         }
 
 
@@ -196,10 +267,13 @@ public class StudMngmentFrame extends JPanel {
         tablePanel.add(R9C3);
         tablePanel.add(R9C4);
         JButton saveButton = buttonEdit();
+        JLabel instruction = new JLabel("Click edit to assign evaluator.");
+        instruction.setForeground(Color.GRAY);
         //bottom panel
         JPanel bottomPanel = new JPanel(new BorderLayout());
         bottomPanel.setBorder(BorderFactory.createEmptyBorder(0, 20, 10, 20));
         bottomPanel.add(saveButton,BorderLayout.EAST);        
+        bottomPanel.add(instruction,BorderLayout.WEST); 
         mainPanel.add(bottomPanel, BorderLayout.SOUTH);
         } else {
             JLabel text = new JLabel("Information unavailable as student not registered to this seminar yet.");
@@ -223,7 +297,7 @@ public class StudMngmentFrame extends JPanel {
     }
 
     //====================================================================================
-    private void changeEvalName(JButton btn) {
+    private void changeEvalName(JButton btn, Appointment appt) {
 
     //convert the string into a combobox
     ArrayList<String> evaluatorList = new ArrayList<>();
@@ -235,13 +309,13 @@ public class StudMngmentFrame extends JPanel {
     JComboBox<String> roleCombo = new JComboBox<>(evaluatorListArray);
 
     JPanel panel = new JPanel(new GridLayout(0, 1));
-    panel.add(new JLabel("Choose role:"));
+    panel.add(new JLabel("Choose evaluator to assign :"));
     panel.add(roleCombo);
 
         int result = JOptionPane.showConfirmDialog(
                 this,
                 panel,
-                "Select Role",
+                "Select evaluator",
                 JOptionPane.OK_CANCEL_OPTION,
                 JOptionPane.PLAIN_MESSAGE
         );
@@ -254,6 +328,14 @@ public class StudMngmentFrame extends JPanel {
                 if (selectedChoice.equals(choice)) {
                     System.out.println(choice + " selected");
                     btn.setText(choice);
+                    appt.setEvaluatorID(DBHelper.getIDbyName(choice));
+                    System.err.println("DEBUG : Updating evaluator for " + appt.getStudentID() +
+                " -> EvaluatorID: " + appt.getEvaluatorID());
+                    try {
+                        DBHelper.updateAppointment(appt.getStudentID(), appt.getEvaluatorID(), appt.getStatus());
+                    } catch (SQLException ex) {
+                        System.getLogger(StudMngmentFrame.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+                    }
                     //result = choice [choice = "Fatimah"]
                     // openRoleScreen(role); // call function dynamically
                     break;
@@ -282,38 +364,38 @@ public class StudMngmentFrame extends JPanel {
         return btn;
     }
 
-    public JButton evaluatorBox(String text, Color bgColor, Color textColor){
-        JButton btn = new JButton(text);
-        btn.setBackground(bgColor);
-        btn.setForeground(textColor);
-        btn.setFocusPainted(false);
-        // btn.setBorderPainted(true);
-        btn.addActionListener(e -> {
-            if ("save".equals(state)) {
-                changeEvalName(btn);
-            }
-        });
-        return btn;
-    }
+    // public JButton evaluatorBox(String text, Color bgColor, Color textColor){
+    //     JButton btn = new JButton(text);
+    //     btn.setBackground(bgColor);
+    //     btn.setForeground(textColor);
+    //     btn.setFocusPainted(false);
+    //     // btn.setBorderPainted(true);
+    //     btn.addActionListener(e -> {
+    //         if ("save".equals(state)) {
+    //             changeEvalName(btn);
+    //         }
+    //     });
+    //     return btn;
+    // }
 
-    String status = "view Report";
+    // String status = "view Report";
     public JButton statusBox(String text, Color bgColor, Color textColor){
         JButton btn = new JButton(text);
         btn.setBackground(bgColor);
         btn.setForeground(textColor);
         btn.setFocusPainted(false);
         // btn.setBorderPainted(true);
-        btn.addActionListener(e -> {
-            if("view Report".equals(status)) {
-                ((LoginFrame) frame).showPanel("reportFrame");
-                btn.setText("view Report");
-            }
+        // btn.addActionListener(e -> {
+        //     if("view Report".equals(status)) {
+        //         ((LoginFrame) frame).showPanel("reportFrame");
+        //         btn.setText("view Report");
+        //     }
                 // } else {
             //     //status = "view Report";
             //     btn.setText("generate Report");
             // } 
 
-        });
+        // });
         return btn;
     }
 
@@ -330,12 +412,14 @@ public class StudMngmentFrame extends JPanel {
             btn.setText("edit");
             btn.setBackground(deepBlue);
             state = "edit";
-            System.out.println("state = "+state);
+            System.out.println("state = "+ state);
         } else if ("edit".equals(state)) {
-                btn.setText("save");
+                btn.setText("stop editing");
                 btn.setBackground(Color.green);
                 state = "save";
-                System.out.println("state = "+state); }
+                System.out.println("state = "+ state); 
+                
+            }
         });
         
         // when save button is clicked, switch to other screen

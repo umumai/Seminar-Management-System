@@ -8,8 +8,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import models.Session;
-import models.User;
+import models.*;
 
 public class DBHelper {
     private static final String DB_URL = "jdbc:sqlite:seminar.db";
@@ -373,15 +372,82 @@ public class DBHelper {
 
     // Insert session_id and student_id into appointments table
     public static boolean insertAppointment(int sessionId, String studentId) throws SQLException {
-        String sql = "INSERT INTO appointments(session_id, student_id) VALUES(?, ?)";
+        String sql = "INSERT INTO appointments(session_id, student_id, status) VALUES(?, ?, ?)";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, sessionId);
             ps.setString(2, studentId);
+            ps.setString(3, "pending evaluator");
             int affected = ps.executeUpdate();
             return affected > 0;
         }
     }
+
+     // Get all appointments from database - KIV not sure gonna use or not
+    // public static List<Appointment> getAllAppointments() {
+    //     String sql = "SELECT session_id, student_id, evaluator_id, time, status FROM appointments";
+    //     List<Appointment> appointments = new ArrayList<>();
+    //     try (Connection conn = getConnection();
+    //          PreparedStatement ps = conn.prepareStatement(sql)) {
+    //         try (ResultSet rs = ps.executeQuery()) {
+    //             while (rs.next()) {
+    //                 int sessionId = rs.getInt("session_id");
+    //                 String studentId = rs.getString("student_id");
+    //                 String evaluatorId = rs.getString("evaluator_id");
+    //                 int timeSlot = rs.getInt("time");
+    //                 String status = rs.getString("status");
+    //                 appointments.add(new Appointment(sessionId, studentId, evaluatorId, timeSlot, status));
+    //             }
+    //         }
+    //     } catch (SQLException e) {
+    //         e.printStackTrace();
+    //     }
+    //     return appointments;
+    // }
+
+     // Get all appointments from database
+    public static List<Appointment> getAppointmentsbySession(int sessionID) {
+        String sql = "SELECT student_id, evaluator_id, time, status FROM appointments WHERE session_id = ?";
+        List<Appointment> appointments = new ArrayList<>();
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, sessionID);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    String studentId = rs.getString("student_id");
+                    String evaluatorId = rs.getString("evaluator_id");
+                    int timeSlot = rs.getInt("time");
+                    String status = rs.getString("status");
+                    appointments.add(new Appointment(sessionID, studentId, evaluatorId, timeSlot, status));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return appointments;
+    }
+
+    // // Create a new appointment and return it
+    // public static Appointment setupAppointment(String studentId) throws SQLException {
+    //     String sql = "SELECT sesion_id, student_id, evaluator_id, time, status FROM appointments WHERE student_id = ?";
+    //     try (Connection conn = getConnection();
+    //          PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+    //         ps.setString(1, studentId);
+    //         try (ResultSet rs = ps.executeQuery()) {
+    //         if (rs.next()) {
+    //             String session_id = rs.getString("session_id");
+    //             String evaluator_id = rs.getString("evaluator_id");
+    //             int time = rs.getInt("time");
+    //             String status = rs.getString("status");
+    //             return new Appointment(session_id,studentId,evaluator_id,time,status); 
+    //         }
+    //     }
+
+    // } catch (SQLException e) {
+    //     e.printStackTrace();
+    // }
+    // return null;
+    // }
 
     // Get student_id from appointments table by sessionId and row number
     public static String getStudentIdFromAppointment(int sessionId, int rowNumber) {
@@ -473,6 +539,53 @@ public class DBHelper {
     }
     return null;
 }
+
+    // Get name from users table by role
+    public static String getNameByID(String ID) {
+        String sql = "SELECT name FROM users WHERE id = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, ID);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("name");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // Get name from users table by role
+    public static String getIDbyName(String name) {
+        String sql = "SELECT id FROM users WHERE name = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, name);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("id");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+     // Update evaluator and status by appointment_id
+    public static boolean updateAppointment(String studentID, String evaluatorId, String status) throws SQLException {
+        String sql = "UPDATE appointments SET evaluator_id = ?, status = ? WHERE student_id = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, evaluatorId);
+            ps.setString(2, status);
+            ps.setString(3, studentID);
+            int affected = ps.executeUpdate();
+            return affected > 0;
+        }
+    }
 
     
 } 
