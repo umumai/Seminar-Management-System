@@ -77,9 +77,10 @@ CREATE TABLE IF NOT EXISTS appointments (
     session_id INTEGER,
     student_id INTEGER,
     evaluator_id INTEGER,
-    time INTEGER,
+    time TEXT,
     status TEXT,
     FOREIGN KEY (session_id) REFERENCES session(session_id),
     FOREIGN KEY (student_id) REFERENCES users(id),
     FOREIGN KEY (evaluator_id) REFERENCES users(id)
 );
+
