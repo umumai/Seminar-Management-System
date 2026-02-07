@@ -1,18 +1,10 @@
 package ui;
 
 import Database.DBHelper;
-import java.awt.CardLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPasswordField;
-import javax.swing.JTextField;
+import java.awt.*;
+import javax.swing.*;
 import models.Coordinator;
+import models.Evaluation;
 import models.Evaluator;
 import models.User;
 import util.TestDevMode;
@@ -25,8 +17,9 @@ public class LoginFrame extends JFrame {
     private StudentPanel studentPanelInstance; // for multi-user support instead of static methods. Also better isolation code
     private User currentUser; // Store authenticated user
     private CoordinatorFrame coordinatorPanelInstance; // Cache for coordinator panel
-    private EvaluatorFrame evaluatorPanelInstance; // Cache for evaluator panel
-    private ReportFrame reportPanelInstance; // Cache for report panel
+    private EvaluatorFrame evaluatorPanelInstance; 
+    private ReportFrame reportPanelInstance; 
+    private EvaluationFrame evaluationPanelInstance;
     private JPanel editSchedulePanelInstance;
 
     public LoginFrame() {
@@ -43,6 +36,8 @@ public class LoginFrame extends JFrame {
         // login panel
         JPanel loginPanel = createLoginPanel();
         
+        
+        //==============Panels setup======================
         // other panels (Coordinator, Student, Evaluator, Register)
         coordinatorPanelInstance = new CoordinatorFrame(this, new Coordinator("COO000", "Coordinator")); // dummy user
         JPanel coordinatorPanel = coordinatorPanelInstance;
@@ -56,7 +51,8 @@ public class LoginFrame extends JFrame {
         reportPanelInstance = new ReportFrame(this);
         JPanel reportPanel = reportPanelInstance;
         JPanel appointmentPanel = new AppointmentFrame(this);
-
+        evaluationPanelInstance = new EvaluationFrame(this);
+        JPanel evaluationPanel = evaluationPanelInstance;
 
         // Add all panels to CardLayout
         mainPanel.add(loginPanel, "LoginPanel");
@@ -68,6 +64,7 @@ public class LoginFrame extends JFrame {
         mainPanel.add(editSchedulePanelInstance, "editSchedulePanel");
         mainPanel.add(reportPanel, "reportPanel");
         mainPanel.add(appointmentPanel, "appointmentPanel");
+        mainPanel.add(evaluationPanel, "evaluationPanel");
 
 
         add(mainPanel);
@@ -189,9 +186,16 @@ public class LoginFrame extends JFrame {
 
     public void showReportPanel(String studentId) {
         if (reportPanelInstance != null) {
-            reportPanelInstance.setStudentId(studentId);
+            reportPanelInstance.setCurrentStud(studentId);
         }
         cardLayout.show(mainPanel, "reportPanel");
+    }
+
+    public void showEvaluationPanel(String studentId) {
+        if (evaluationPanelInstance != null) {
+            evaluationPanelInstance.setCurrentStud(studentId);
+        }
+        cardLayout.show(mainPanel, "evaluationPanel");
     }
     
     public StudentPanel getStudentPanel() {
