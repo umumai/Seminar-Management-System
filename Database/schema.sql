@@ -1,4 +1,4 @@
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     id TEXT PRIMARY KEY,
     name TEXT UNIQUE NOT NULL,
     role TEXT NOT NULL,
@@ -71,3 +71,16 @@ CREATE TABLE IF NOT EXISTS report (
     report_type TEXT,
     generated_date TEXT
 );
+
+CREATE TABLE IF NOT EXISTS appointments (
+    appointment_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    session_id INTEGER,
+    student_id INTEGER,
+    evaluator_id INTEGER,
+    time TEXT,
+    status TEXT,
+    FOREIGN KEY (session_id) REFERENCES session(session_id),
+    FOREIGN KEY (student_id) REFERENCES users(id),
+    FOREIGN KEY (evaluator_id) REFERENCES users(id)
+);
+

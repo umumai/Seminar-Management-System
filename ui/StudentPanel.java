@@ -1,16 +1,14 @@
 package ui;
 
+import Database.DBHelper;
 import java.awt.*;
 import java.io.File;
 import java.util.List;
 import java.util.logging.Logger;
-import javax.swing.*;
-
-import javax.swing.filechooser.FileNameExtensionFilter; //sub-package for file chooser (canot remove)
-
-import models.User;
+import javax.swing.*; //sub-package for file chooser (canot remove)
+import javax.swing.filechooser.FileNameExtensionFilter;
 import models.Session;
-import Database.DBHelper;
+import models.User;
 
 public class StudentPanel {
     private static final Logger logger = Logger.getLogger(StudentPanel.class.getName());
@@ -614,6 +612,9 @@ public class StudentPanel {
                 materialPathField.getText().trim(),
                 sessionId
             );
+
+            //give appointment to student
+            DBHelper.insertAppointment(sessionId, studentId);
             
             // Update local state - only set registeredSeminar on successful submission
             registeredSeminar = selectedSeminarTemp;

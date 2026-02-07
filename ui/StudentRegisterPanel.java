@@ -40,6 +40,7 @@ public class StudentRegisterPanel {
             }
             try {
                 String newId = DBHelper.createStudent(name, pass);
+                DBHelper.insertStudentProfile(newId);
                 JOptionPane.showMessageDialog(parent, "Account created. Your ID: " + newId);
                 nameField.setText("");
                 passField.setText("");

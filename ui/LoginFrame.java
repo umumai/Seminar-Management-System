@@ -12,6 +12,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+import models.Coordinator;
+import models.Evaluator;
 import models.User;
 import util.TestDevMode;
 
@@ -21,11 +23,16 @@ public class LoginFrame extends JFrame {
     private final CardLayout cardLayout;
     private final JPanel mainPanel;
     private StudentPanel studentPanelInstance; // for multi-user support instead of static methods. Also better isolation code
+    private User currentUser; // Store authenticated user
+    private CoordinatorFrame coordinatorPanelInstance; // Cache for coordinator panel
+    private EvaluatorFrame evaluatorPanelInstance; // Cache for evaluator panel
+    private ReportFrame reportPanelInstance; // Cache for report panel
+    private JPanel editSchedulePanelInstance;
 
     public LoginFrame() {
         setTitle("Seminar Management System");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setSize(600, 400);
+        setSize(1000, 500);
         setLocationRelativeTo(null);
 
 
@@ -37,15 +44,18 @@ public class LoginFrame extends JFrame {
         JPanel loginPanel = createLoginPanel();
         
         // other panels (Coordinator, Student, Evaluator, Register)
-        JPanel coordinatorPanel = new CoordinatorFrame(this);
+        coordinatorPanelInstance = new CoordinatorFrame(this, new Coordinator("COO000", "Coordinator")); // dummy user
+        JPanel coordinatorPanel = coordinatorPanelInstance;
         studentPanelInstance = new StudentPanel(this);
         JPanel studentPanel = studentPanelInstance.getPanel();
-        JPanel evaluatorPanel = EvaluatorPanel.createPanel(this);
+        evaluatorPanelInstance = new EvaluatorFrame(this, new Evaluator("EVA000", "Evaluator", "")); // dummy user
+        JPanel evaluatorPanel = evaluatorPanelInstance;
         JPanel registerPanel = StudentRegisterPanel.createPanel(this);
         JPanel scheduleFrame = new ScheduleFrame(this);
-        JPanel editSchedulePanel = new EditSchedule(this);
-        JPanel reportPanel = new ReportFrame(this);
-        JPanel studManagementPanel = new StudMngmentFrame(this);
+        editSchedulePanelInstance = new EditSchedule(this);
+        reportPanelInstance = new ReportFrame(this);
+        JPanel reportPanel = reportPanelInstance;
+        JPanel appointmentPanel = new AppointmentFrame(this);
 
 
         // Add all panels to CardLayout
@@ -55,9 +65,9 @@ public class LoginFrame extends JFrame {
         mainPanel.add(evaluatorPanel, "EvaluatorPanel");
         mainPanel.add(registerPanel, "RegisterPanel");
         mainPanel.add(scheduleFrame, "schedulePanel");
-        mainPanel.add(editSchedulePanel, "editSchedulePanel");
+        mainPanel.add(editSchedulePanelInstance, "editSchedulePanel");
         mainPanel.add(reportPanel, "reportPanel");
-        mainPanel.add(studManagementPanel, "studManagementPanel");
+        mainPanel.add(appointmentPanel, "appointmentPanel");
 
 
         add(mainPanel);
@@ -128,10 +138,18 @@ public class LoginFrame extends JFrame {
         }
 
         String role = u.getRole();
+        if (role != null) {
+            role = role.trim().toUpperCase(); // Normalize role to uppercase
+        }
+        System.out.println("DEBUG: Logged in user - ID: " + u.getId() + ", Name: " + u.getName() + ", Role: '" + role + "'");
+        this.currentUser = u; // Store the authenticated user
         // int code = 0;
         switch (role) {
 
-            case "COORDINATOR": 
+            case "COORDINATOR":
+                // Update coordinator panel with authenticated user - convert to Coordinator
+                Coordinator coordinator = new Coordinator(u.getId(), u.getName());
+                coordinatorPanelInstance.updateUser(coordinator);
                 cardLayout.show(mainPanel, "CoordinatorPanel");
                 return;
 
@@ -142,10 +160,16 @@ public class LoginFrame extends JFrame {
                 cardLayout.show(mainPanel, "StudentPanel");
                 return;
             case "EVALUATOR":
-                EvaluatorPanel.setUser(u);
+                Evaluator evaluator = new Evaluator(u.getId(), u.getName(), u.getPassword());
+                evaluatorPanelInstance.updateUser(evaluator);
                 cardLayout.show(mainPanel, "EvaluatorPanel");
                 return;
-        }
+            
+            default:
+                System.out.println("DEBUG: No matching role found. Role was: '" + role + "'"); // Debug
+                JOptionPane.showMessageDialog(this, "Unknown role: " + role);
+                return;
+            }
     }
 
     public void showLoginPanel() {
@@ -153,10 +177,28 @@ public class LoginFrame extends JFrame {
     }
 
     public void showPanel(String panelName) {
+        if ("editSchedulePanel".equals(panelName)) {
+            mainPanel.remove(editSchedulePanelInstance);
+            editSchedulePanelInstance = new EditSchedule(this);
+            mainPanel.add(editSchedulePanelInstance, "editSchedulePanel");
+            mainPanel.revalidate();
+            mainPanel.repaint();
+        }
         cardLayout.show(mainPanel, panelName);
+    }
+
+    public void showReportPanel(String studentId) {
+        if (reportPanelInstance != null) {
+            reportPanelInstance.setStudentId(studentId);
+        }
+        cardLayout.show(mainPanel, "reportPanel");
     }
     
     public StudentPanel getStudentPanel() {
         return studentPanelInstance;
+    }
+    
+    public User getCurrentUser() {
+        return currentUser;
     }
 }

@@ -8,9 +8,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-
-import models.User;
-import models.Session;
+import models.*;
 
 public class DBHelper {
     private static final String DB_URL = "jdbc:sqlite:seminar.db";
@@ -263,5 +261,312 @@ public class DBHelper {
         }
         return "Pending";
     }
+
+    // Create a new session with only date and venue, returns generated session_id or -1 on failure
+    public static int createSession(String sessionDate, String venue) throws SQLException {
+        String sql = "INSERT INTO session(session_date, venue) VALUES(?, ?)";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setString(1, sessionDate);
+            ps.setString(2, venue);
+            int affected = ps.executeUpdate();
+            if (affected == 0) return -1;
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        }
+        return -1;
+    }
+
+    // Check whether a session with the given session_id exists
+    public static boolean sessionExists(int sessionId) {
+        String sql = "SELECT 1 FROM session WHERE session_id = ? LIMIT 1";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, sessionId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    // Return the total number of sessions in the database
+    public static int getSessionCount() {
+        String sql = "SELECT COUNT(*) FROM session";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+    
+    // Get session data by session_id (row number)
+    public static Session getSession(int sessionId) {
+        String sql = "SELECT session_id, session_date, venue, session_type FROM session WHERE session_id = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, sessionId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    String date = rs.getString("session_date");
+                    String venue = rs.getString("venue");
+                    String type = rs.getString("session_type");
+                    String sessionIdStr = String.format("SEM%03d", sessionId);
+                    return new Session(sessionIdStr, date, venue, type);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // Insert student_id into student_profile table
+    public static boolean insertStudentProfile(String studentId) throws SQLException {
+        String sql = "INSERT INTO student_profile(student_id) VALUES(?)";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, studentId);
+            int affected = ps.executeUpdate();
+            return affected > 0;
+        }
+    }
+
+    // Insert student_id and session_id into session_presenter table
+    public static boolean insertSessionPresenter(int sessionId) throws SQLException {
+        String sql = "INSERT INTO session_presenter(session_id) VALUES(?)";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, sessionId);
+            int affected = ps.executeUpdate();
+            return affected > 0;
+        }
+    }
+
+    // Get student name from users table by student_id
+    public static String getStudentNameById(String studentId) {
+        String sql = "SELECT name FROM users WHERE id = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, studentId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("name");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // Insert session_id and student_id into appointments table
+    public static boolean insertAppointment(int sessionId, String studentId) throws SQLException {
+        String sql = "INSERT INTO appointments(session_id, student_id, time, status) VALUES(?, ?, ?, ?)";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, sessionId);
+            ps.setString(2, studentId);
+            ps.setString(3, "0");
+            ps.setString(4, "pending evaluator");
+            int affected = ps.executeUpdate();
+            return affected > 0;
+        }
+    }
+
+    //  Get all appointments from database
+    public static List<Appointment> getAllAppointments() {
+        String sql = "SELECT session_id, student_id, evaluator_id, time, status FROM appointments";
+        List<Appointment> appointments = new ArrayList<>();
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    int sessionId = rs.getInt("session_id");
+                    String studentId = rs.getString("student_id");
+                    String evaluatorId = rs.getString("evaluator_id");
+                    String timeSlot = rs.getString("time");
+                    String status = rs.getString("status");
+                    appointments.add(new Appointment(sessionId, studentId, evaluatorId, timeSlot, status));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return appointments;
+    }
+
+     // Get all appointments from database
+    public static List<Appointment> getAppointmentsbySession(int sessionID) {
+        String sql = "SELECT student_id, evaluator_id, time, status FROM appointments WHERE session_id = ?";
+        List<Appointment> appointments = new ArrayList<>();
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, sessionID);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    String studentId = rs.getString("student_id");
+                    String evaluatorId = rs.getString("evaluator_id");
+                    String timeSlot = rs.getString("time");
+                    String status = rs.getString("status");
+                    appointments.add(new Appointment(sessionID, studentId, evaluatorId, timeSlot, status));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return appointments;
+    }
+
+    // Get student_id from appointments table by sessionId and row number
+    public static String getStudentIdFromAppointment(int sessionId, int rowNumber) {
+        String sql = "SELECT student_id FROM appointments WHERE session_id = ? LIMIT 1 OFFSET ?";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, sessionId);
+            ps.setInt(2, rowNumber - 1);  // Start from 0
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("student_id");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    //update time slot
+    public static boolean updateTimeSlot(String timeSlot, String studentID) throws SQLException {
+    String sql = "UPDATE appointments SET time = ? WHERE student_id = ?";
+    
+    try (Connection conn = getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setString(1, timeSlot);
+        ps.setString(2, studentID);
+        int affected = ps.executeUpdate();
+        return affected > 0;
+    }
+}
+
+    // Get name from users table by role
+    public static String getUserByRole(String role, int rowNumber) {
+        String sql = "SELECT name FROM users WHERE role = ? LIMIT 1 OFFSET ?";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, role);
+            ps.setInt(2, rowNumber - 1);  // Start from 0
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("name");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    //check each existing row
+   public static boolean checkUserbyRow(int rowNumber) {
+    String sql = "SELECT 1 FROM users LIMIT 1 OFFSET ?";
+
+    try (Connection conn = getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+
+        ps.setInt(1, rowNumber - 1);
+        try (ResultSet rs = ps.executeQuery()) {
+            return rs.next();
+        }
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+
+    return false;
+}
+
+
+    public static User getUserbyID(String id) {
+    String sql = "SELECT id, name, role, password FROM users WHERE id = ?";
+    try (Connection conn = getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+
+        ps.setString(1, id);
+
+        try (ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                String name = rs.getString("name");
+                String role = rs.getString("role");
+                String password = rs.getString("password");
+                return new User(id, name, role, password); // Use 4-parameter constructor
+            }
+        }
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return null;
+}
+
+    // Get name from users table by role
+    public static String getNameByID(String ID) {
+        String sql = "SELECT name FROM users WHERE id = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, ID);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("name");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // Get name from users table by role
+    public static String getIDbyName(String name) {
+        String sql = "SELECT id FROM users WHERE name = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, name);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("id");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+     // Update evaluator and status by appointment_id
+    public static boolean updateAppointment(String studentID, String evaluatorId, String time, String status) throws SQLException {
+        String sql = "UPDATE appointments SET evaluator_id = ?, time = ? , status = ? WHERE student_id = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, evaluatorId);
+            ps.setString(2, time);
+            ps.setString(3, status);
+            ps.setString(4, studentID);
+            int affected = ps.executeUpdate();
+            return affected > 0;
+        }
+    }
+
+    
 } 
 
