@@ -15,12 +15,11 @@ public class EditSchedule extends JPanel{
     public EditSchedule(JFrame frame){
         this.frame=frame;
         setLayout(new BorderLayout());
-        setBackground(deepBlue);
 
         JPanel topPanel = new JPanel(new BorderLayout());
         //topPanel.setBackground(beige);
         topPanel.setBorder(BorderFactory.createEmptyBorder(5,15,5,5));
-        JLabel coordinatorLabel = new JLabel("Manage Schedule"); 
+        JLabel coordinatorLabel = new JLabel("View Schedule"); 
         JButton returnButton = new JButton("return");
         returnButton.addActionListener(e->{
             ((LoginFrame) frame).showPanel("CoordinatorPanel");

@@ -3,15 +3,13 @@ import Database.DBHelper;
 import java.awt.*;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import javax.swing.*;
 import models.*;
 
 //dalam coordinator frame ni kita just place the JTabbedPane. 
 // and then we place the other frame (from other file) into each tabs
-public class StudMngmentFrame extends JPanel {
+public class AppointmentFrame extends JPanel {
     private JFrame frame;
     private String students;
     private String evaluators;
@@ -19,7 +17,7 @@ public class StudMngmentFrame extends JPanel {
     public Color deepBlue = new Color(14,69,128);
     private List<Appointment> apptList;
     
-    public StudMngmentFrame(JFrame frame) {
+    public AppointmentFrame(JFrame frame) {
         this.frame=frame;
         setLayout(new BorderLayout());
 
@@ -28,7 +26,7 @@ public class StudMngmentFrame extends JPanel {
         //top Panel
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setBorder(BorderFactory.createEmptyBorder(5,15,5,5));
-        JLabel coordinatorLabel = new JLabel("Student Management"); 
+        JLabel coordinatorLabel = new JLabel("Appointment Management"); 
         JButton returnButton = new JButton("return");
         returnButton.addActionListener(e->{((LoginFrame) frame).showPanel("CoordinatorPanel");});
         topPanel.add(coordinatorLabel,BorderLayout.WEST);
@@ -40,11 +38,12 @@ public class StudMngmentFrame extends JPanel {
 
         //check how many session exist
         int sessionList = DBHelper.getSessionCount();
-        System.err.println("DEBUG : Total session exist in studmanagement = " + sessionList);
+        System.err.println("DEBUG : Total session exist in appointment management = " + sessionList);
         for (int i = 1; i <= sessionList; i++) {
             JPanel mainPanel = new JPanel(new BorderLayout());
             // Create Appointment objects for each appointment_id in the database
             apptList = DBHelper.getAppointmentsbySession(i);
+            List<Appointment> sessionAppointments = apptList;
             //DEBUG
             // System.err.println("DEBUG : Total appointments exist in session " + i + " = " + apptList.size());
             // for (Appointment appointment : apptList) {
@@ -96,7 +95,7 @@ public class StudMngmentFrame extends JPanel {
             });
             R2C4.addActionListener(e -> {
                 if ("save".equals(state)) {
-                    changeTime(R2C4, currentAppt, apptList);
+                    changeTime(R2C4, currentAppt, sessionAppointments);
                 }
             });
             if ((currentAppt.getEvaluatorID()) != null){
@@ -132,7 +131,7 @@ public class StudMngmentFrame extends JPanel {
             });
             R3C4.addActionListener(e -> {
                 if ("save".equals(state)) {
-                    changeTime(R3C4, currentAppt, apptList);
+                    changeTime(R3C4, currentAppt, sessionAppointments);
                 }
             });
             if ((currentAppt.getEvaluatorID()) != null){
@@ -167,7 +166,7 @@ public class StudMngmentFrame extends JPanel {
             });
             R4C4.addActionListener(e -> {
                 if ("save".equals(state)) {
-                    changeTime(R4C4, currentAppt, apptList);
+                    changeTime(R4C4, currentAppt, sessionAppointments);
                 }
             });
             if ((currentAppt.getEvaluatorID()) != null){
@@ -203,7 +202,7 @@ public class StudMngmentFrame extends JPanel {
             });
             R5C4.addActionListener(e -> {
                 if ("save".equals(state)) {
-                    changeTime(R5C4, currentAppt, apptList);
+                    changeTime(R5C4, currentAppt, sessionAppointments);
                 }
             });
             if ((currentAppt.getEvaluatorID()) != null){
@@ -239,7 +238,7 @@ public class StudMngmentFrame extends JPanel {
             });
             R6C4.addActionListener(e -> {
                 if ("save".equals(state)) {
-                    changeTime(R6C4, currentAppt, apptList);
+                    changeTime(R6C4, currentAppt, sessionAppointments);
                 }
             });
             if ((currentAppt.getEvaluatorID()) != null){
@@ -275,7 +274,7 @@ public class StudMngmentFrame extends JPanel {
             });
             R7C4.addActionListener(e -> {
                 if ("save".equals(state)) {
-                    changeTime(R7C4, currentAppt, apptList);
+                    changeTime(R7C4, currentAppt, sessionAppointments);
                 }
             });
             if ((currentAppt.getEvaluatorID()) != null){
@@ -311,7 +310,7 @@ public class StudMngmentFrame extends JPanel {
             });
             R8C4.addActionListener(e -> {
                 if ("save".equals(state)) {
-                    changeTime(R8C4, currentAppt, apptList);
+                    changeTime(R8C4, currentAppt, sessionAppointments);
                 }
             });
             if ((currentAppt.getEvaluatorID()) != null){
@@ -347,7 +346,7 @@ public class StudMngmentFrame extends JPanel {
             });
             R9C4.addActionListener(e -> {
                 if ("save".equals(state)) {
-                    changeTime(R9C4, currentAppt, apptList);
+                    changeTime(R9C4, currentAppt, sessionAppointments);
                 }
             });
             if ((currentAppt.getEvaluatorID()) != null){
@@ -434,7 +433,7 @@ public class StudMngmentFrame extends JPanel {
         bottomPanel.add(instruction,BorderLayout.WEST); 
         mainPanel.add(bottomPanel, BorderLayout.SOUTH);
         } else {
-            JLabel text = new JLabel("Information unavailable as student not registered to this seminar yet.");
+            JLabel text = new JLabel("Information unavailable as student not registered to this seminar yet.", SwingConstants.CENTER);
             tablePanel.add(text);
         }
 
@@ -501,7 +500,7 @@ public class StudMngmentFrame extends JPanel {
                     try {
                         DBHelper.updateAppointment(appt.getStudentID(), appt.getEvaluatorID(), appt.getTimeSlot(), appt.getStatus());
                     } catch (SQLException ex) {
-                        System.getLogger(StudMngmentFrame.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+                        System.getLogger(AppointmentFrame.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
                     }
                     //result = choice [choice = "Fatimah"]
                     // openRoleScreen(role); // call function dynamically
@@ -515,18 +514,21 @@ public class StudMngmentFrame extends JPanel {
 
     //convert the string into a combobox
     ArrayList<String> availTime = new ArrayList<>();
-    for (int i = 9; i <= 17; i++) {
+    for (int i = 9; i <= 16; i++) {
         availTime.add(String.valueOf(i));
     }
 
-    Set<String> bookedTimes = new HashSet<>();
+    ArrayList<String> bookedTime = new ArrayList<>();
     for (Appointment apt : sessionAppointments) {
+        System.out.println("DEBUG : " + apt.getTimeSlot()  + ":00 is taken by " + DBHelper.getNameByID(apt.getStudentID()));
         if (apt != null && apt.getTimeSlot() != null && !"0".equals(apt.getTimeSlot())) {
-            bookedTimes.add(apt.getTimeSlot());
+            bookedTime.add(apt.getTimeSlot());
+            // System.out.println("DEBUG : ");
         }
     }
 
-    availTime.removeIf(bookedTimes::contains);
+    System.out.println("DEBUG changeTime: availTime initial 9-17, bookedTimes=" + bookedTime + ", availTimeRemaining=" + availTime);
+    availTime.removeIf(bookedTime::contains);
     
     // Convert ArrayList to array
     String[] availTimeArray = availTime.toArray(new String[0]);
@@ -560,7 +562,7 @@ public class StudMngmentFrame extends JPanel {
                     try {
                         DBHelper.updateAppointment(appt.getStudentID(), appt.getEvaluatorID(), appt.getTimeSlot(), appt.getStatus());
                     } catch (SQLException ex) {
-                        System.getLogger(StudMngmentFrame.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+                        System.getLogger(AppointmentFrame.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
                     }
                     //result = choice [choice = "Fatimah"]
                     // openRoleScreen(role); // call function dynamically

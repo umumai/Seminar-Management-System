@@ -22,7 +22,7 @@ public class CLNavigation extends JFrame {
         EditSchedule editScheduleFrame = new EditSchedule(this);
         ScheduleFrame viewScheduleFrame = new ScheduleFrame(this);
         CoordinatorFrame coordinatorFrame = new CoordinatorFrame(this, null);
-        StudMngmentFrame studMngmentFrame = new StudMngmentFrame(this);
+        AppointmentFrame appointmentFrame = new AppointmentFrame(this);
         ReportFrame reportFrame = new ReportFrame(this);
         // LoginFrame loginFrame = new LoginFrame(this);
         // StudentRegisterPanel studentRegisterPanel = new StudentRegisterPanel(this);
@@ -31,7 +31,7 @@ public class CLNavigation extends JFrame {
         container.add(editScheduleFrame, "editScheduleFrame");
         container.add(viewScheduleFrame, "viewScheduleFrame");
         container.add(coordinatorFrame,"coordinatorFrame");
-        container.add(studMngmentFrame,"studMngmentFrame");
+        container.add(appointmentFrame,"appointmentFrame");
         container.add(reportFrame,"reportFrame");
         // container.add(loginFrame,"loginFrame");
         // container.add(studentRegisterPanel,"studentRegisterPanel");

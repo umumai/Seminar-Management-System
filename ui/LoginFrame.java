@@ -13,6 +13,7 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import models.Coordinator;
+import models.Evaluator;
 import models.User;
 import util.TestDevMode;
 
@@ -24,6 +25,8 @@ public class LoginFrame extends JFrame {
     private StudentPanel studentPanelInstance; // for multi-user support instead of static methods. Also better isolation code
     private User currentUser; // Store authenticated user
     private CoordinatorFrame coordinatorPanelInstance; // Cache for coordinator panel
+    private EvaluatorFrame evaluatorPanelInstance; // Cache for evaluator panel
+    private ReportFrame reportPanelInstance; // Cache for report panel
     private JPanel editSchedulePanelInstance;
 
     public LoginFrame() {
@@ -41,16 +44,18 @@ public class LoginFrame extends JFrame {
         JPanel loginPanel = createLoginPanel();
         
         // other panels (Coordinator, Student, Evaluator, Register)
-        coordinatorPanelInstance = new CoordinatorFrame(this, new Coordinator("COO000", "Coordinator")); // Create with dummy user
+        coordinatorPanelInstance = new CoordinatorFrame(this, new Coordinator("COO000", "Coordinator")); // dummy user
         JPanel coordinatorPanel = coordinatorPanelInstance;
         studentPanelInstance = new StudentPanel(this);
         JPanel studentPanel = studentPanelInstance.getPanel();
-        JPanel evaluatorPanel = EvaluatorPanel.createPanel(this);
+        evaluatorPanelInstance = new EvaluatorFrame(this, new Evaluator("EVA000", "Evaluator", "")); // dummy user
+        JPanel evaluatorPanel = evaluatorPanelInstance;
         JPanel registerPanel = StudentRegisterPanel.createPanel(this);
         JPanel scheduleFrame = new ScheduleFrame(this);
         editSchedulePanelInstance = new EditSchedule(this);
-        JPanel reportPanel = new ReportFrame(this);
-        JPanel studManagementPanel = new StudMngmentFrame(this);
+        reportPanelInstance = new ReportFrame(this);
+        JPanel reportPanel = reportPanelInstance;
+        JPanel appointmentPanel = new AppointmentFrame(this);
 
 
         // Add all panels to CardLayout
@@ -62,7 +67,7 @@ public class LoginFrame extends JFrame {
         mainPanel.add(scheduleFrame, "schedulePanel");
         mainPanel.add(editSchedulePanelInstance, "editSchedulePanel");
         mainPanel.add(reportPanel, "reportPanel");
-        mainPanel.add(studManagementPanel, "studManagementPanel");
+        mainPanel.add(appointmentPanel, "appointmentPanel");
 
 
         add(mainPanel);
@@ -155,7 +160,8 @@ public class LoginFrame extends JFrame {
                 cardLayout.show(mainPanel, "StudentPanel");
                 return;
             case "EVALUATOR":
-                EvaluatorPanel.setUser(u);
+                Evaluator evaluator = new Evaluator(u.getId(), u.getName(), u.getPassword());
+                evaluatorPanelInstance.updateUser(evaluator);
                 cardLayout.show(mainPanel, "EvaluatorPanel");
                 return;
             
@@ -179,6 +185,13 @@ public class LoginFrame extends JFrame {
             mainPanel.repaint();
         }
         cardLayout.show(mainPanel, panelName);
+    }
+
+    public void showReportPanel(String studentId) {
+        if (reportPanelInstance != null) {
+            reportPanelInstance.setStudentId(studentId);
+        }
+        cardLayout.show(mainPanel, "reportPanel");
     }
     
     public StudentPanel getStudentPanel() {
