@@ -10,8 +10,6 @@ import models.*;
 public class CoordinatorFrame extends JPanel {
     private JFrame frame;
     private Coordinator currentUser;
-    // private JPanel cLayoutPanel;
-    // private CardLayout cardLayout;
     public Color deepBlue = new Color(14,69,128);
     public Color deepRed = new Color(151, 32, 0);
 
@@ -44,7 +42,7 @@ public class CoordinatorFrame extends JPanel {
         JButton newSeminarBtn = createSeminarActionBtn("new Seminar");
         JButton studMngmentBtn = new JButton("Appointment management");
         studMngmentBtn.addActionListener(e -> {
-            ((LoginFrame) frame).showPanel("studManagementPanel");
+            ((LoginFrame) frame).showPanel("appointmentPanel");
         });
         JButton scheduleMngmentBtn = new JButton("View schedule");
         scheduleMngmentBtn.addActionListener(e -> {
@@ -83,7 +81,7 @@ public class CoordinatorFrame extends JPanel {
         JButton newSeminarBtn = createSeminarActionBtn("new Seminar");
         JButton studMngmentBtn = new JButton("student management");
         studMngmentBtn.addActionListener(e -> {
-            ((LoginFrame) frame).showPanel("studManagementPanel");
+            ((LoginFrame) frame).showPanel("appointmentPanel");
         });
         JButton scheduleMngmentBtn = new JButton("manage schedule");
         scheduleMngmentBtn.addActionListener(e -> {

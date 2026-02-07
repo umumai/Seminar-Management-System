@@ -384,27 +384,27 @@ public class DBHelper {
         }
     }
 
-     // Get all appointments from database - KIV not sure gonna use or not
-    // public static List<Appointment> getAllAppointments() {
-    //     String sql = "SELECT session_id, student_id, evaluator_id, time, status FROM appointments";
-    //     List<Appointment> appointments = new ArrayList<>();
-    //     try (Connection conn = getConnection();
-    //          PreparedStatement ps = conn.prepareStatement(sql)) {
-    //         try (ResultSet rs = ps.executeQuery()) {
-    //             while (rs.next()) {
-    //                 int sessionId = rs.getInt("session_id");
-    //                 String studentId = rs.getString("student_id");
-    //                 String evaluatorId = rs.getString("evaluator_id");
-    //                 int timeSlot = rs.getInt("time");
-    //                 String status = rs.getString("status");
-    //                 appointments.add(new Appointment(sessionId, studentId, evaluatorId, timeSlot, status));
-    //             }
-    //         }
-    //     } catch (SQLException e) {
-    //         e.printStackTrace();
-    //     }
-    //     return appointments;
-    // }
+    //  Get all appointments from database
+    public static List<Appointment> getAllAppointments() {
+        String sql = "SELECT session_id, student_id, evaluator_id, time, status FROM appointments";
+        List<Appointment> appointments = new ArrayList<>();
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    int sessionId = rs.getInt("session_id");
+                    String studentId = rs.getString("student_id");
+                    String evaluatorId = rs.getString("evaluator_id");
+                    String timeSlot = rs.getString("time");
+                    String status = rs.getString("status");
+                    appointments.add(new Appointment(sessionId, studentId, evaluatorId, timeSlot, status));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return appointments;
+    }
 
      // Get all appointments from database
     public static List<Appointment> getAppointmentsbySession(int sessionID) {
@@ -497,7 +497,7 @@ public class DBHelper {
 }
 
 
-    public static User userData(String id) {
+    public static User getUserbyID(String id) {
     String sql = "SELECT id, name, role, password FROM users WHERE id = ?";
     try (Connection conn = getConnection();
          PreparedStatement ps = conn.prepareStatement(sql)) {
