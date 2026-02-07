@@ -13,7 +13,7 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
 import models.User;
-import database.DBHelper;
+import Database.DBHelper;
 import util.TestDevMode;
 
 public class LoginFrame extends JFrame {

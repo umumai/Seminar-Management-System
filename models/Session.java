@@ -34,3 +34,4 @@ public class Session {
         return String.format("Date: %s | Venue: %s | Type: %s", date, venue, sessionType);
     }
 }
+

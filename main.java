@@ -1,6 +1,6 @@
 import javax.swing.SwingUtilities;
 
-import database.DBHelper;
+import Database.DBHelper;
 import ui.LoginFrame;
 
 public class main {

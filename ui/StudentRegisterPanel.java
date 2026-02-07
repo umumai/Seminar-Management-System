@@ -12,7 +12,7 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
-import database.DBHelper;
+import Database.DBHelper;
 
 public class StudentRegisterPanel {
     public static JPanel createPanel(JFrame parent) {
