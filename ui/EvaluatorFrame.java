@@ -13,6 +13,9 @@ import models.*;
 public class EvaluatorFrame extends JPanel {
     private JFrame frame;
     private Evaluator currentUser;
+    private final CardLayout contentLayout = new CardLayout();
+    private final JPanel contentPanel = new JPanel(contentLayout);
+    private final JLabel evaluationTitle = new JLabel("Evaluation", SwingConstants.CENTER);
     public Color deepBlue = new Color(14,69,128);
     public Color deepRed = new Color(151, 32, 0);
     
@@ -33,7 +36,12 @@ public class EvaluatorFrame extends JPanel {
 
         //============top Panel
         JPanel topPanel = new JPanel(new BorderLayout());
-        topPanel.setBorder(BorderFactory.createEmptyBorder(5,15,5,5));
+        topPanel.setBorder(
+        BorderFactory.createCompoundBorder(
+            BorderFactory.createMatteBorder(0, 0, 1, 0, Color.GRAY), // line
+            BorderFactory.createEmptyBorder(5, 15, 5, 5)            // padding
+            )
+        );
         String evaluatorName = currentUser != null ? currentUser.getName() : "Evaluator";
         JLabel evaluatorLabel = new JLabel("Evaluator " + evaluatorName);
         JButton logoutButton = new JButton("Logout");
@@ -138,9 +146,7 @@ public class EvaluatorFrame extends JPanel {
                         if (appt.getEvaluatorID() == null ? currentUser.getId() == null : appt.getEvaluatorID().equals(currentUser.getId()))
                         {
                             R2C2.addActionListener(e -> {
-                            if (frame instanceof LoginFrame) {
-                                ((LoginFrame) frame).showReportPanel(appt.getStudentID());
-                                }
+                            showEvaluationPanel(appt.getStudentID());
                             });
                         } else {
                             R2C2.setForeground(Color.gray);
@@ -152,9 +158,7 @@ public class EvaluatorFrame extends JPanel {
                         if (appt.getEvaluatorID() == null ? currentUser.getId() == null : appt.getEvaluatorID().equals(currentUser.getId()))
                         {
                             R3C2.addActionListener(e -> {
-                            if (frame instanceof LoginFrame) {
-                                ((LoginFrame) frame).showReportPanel(appt.getStudentID());
-                                }
+                            showEvaluationPanel(appt.getStudentID());
                             });
                         } else {
                             R3C2.setForeground(Color.gray);
@@ -166,9 +170,7 @@ public class EvaluatorFrame extends JPanel {
                         if (appt.getEvaluatorID() == null ? currentUser.getId() == null : appt.getEvaluatorID().equals(currentUser.getId()))
                         {
                             R4C2.addActionListener(e -> {
-                            if (frame instanceof LoginFrame) {
-                                ((LoginFrame) frame).showReportPanel(appt.getStudentID());
-                                }
+                            showEvaluationPanel(appt.getStudentID());
                             });
                         } else {
                             R4C2.setForeground(Color.gray);
@@ -180,9 +182,7 @@ public class EvaluatorFrame extends JPanel {
                         if (appt.getEvaluatorID() == null ? currentUser.getId() == null : appt.getEvaluatorID().equals(currentUser.getId()))
                         {
                             R5C2.addActionListener(e -> {
-                            if (frame instanceof LoginFrame) {
-                                ((LoginFrame) frame).showReportPanel(appt.getStudentID());
-                                }
+                            showEvaluationPanel(appt.getStudentID());
                             });
                         } else {
                             R5C2.setForeground(Color.gray);
@@ -194,9 +194,7 @@ public class EvaluatorFrame extends JPanel {
                         if (appt.getEvaluatorID() == null ? currentUser.getId() == null : appt.getEvaluatorID().equals(currentUser.getId()))
                         {
                             R6C2.addActionListener(e -> {
-                            if (frame instanceof LoginFrame) {
-                                ((LoginFrame) frame).showReportPanel(appt.getStudentID());
-                                }
+                            showEvaluationPanel(appt.getStudentID());
                             });
                         } else {
                             R6C2.setForeground(Color.gray);
@@ -208,9 +206,7 @@ public class EvaluatorFrame extends JPanel {
                         if (appt.getEvaluatorID() == null ? currentUser.getId() == null : appt.getEvaluatorID().equals(currentUser.getId()))
                         {
                             R7C2.addActionListener(e -> {
-                            if (frame instanceof LoginFrame) {
-                                ((LoginFrame) frame).showReportPanel(appt.getStudentID());
-                                }
+                            showEvaluationPanel(appt.getStudentID());
                             });
                         } else {
                             R7C2.setForeground(Color.gray);
@@ -222,9 +218,7 @@ public class EvaluatorFrame extends JPanel {
                         if (appt.getEvaluatorID() == null ? currentUser.getId() == null : appt.getEvaluatorID().equals(currentUser.getId()))
                         {
                             R8C2.addActionListener(e -> {
-                            if (frame instanceof LoginFrame) {
-                                ((LoginFrame) frame).showReportPanel(appt.getStudentID());
-                                }
+                            showEvaluationPanel(appt.getStudentID());
                             });
                         } else {
                             R8C2.setForeground(Color.gray);
@@ -236,9 +230,7 @@ public class EvaluatorFrame extends JPanel {
                         if (appt.getEvaluatorID() == null ? currentUser.getId() == null : appt.getEvaluatorID().equals(currentUser.getId()))
                         {
                             R9C2.addActionListener(e -> {
-                            if (frame instanceof LoginFrame) {
-                                ((LoginFrame) frame).showReportPanel(appt.getStudentID());
-                                }
+                            showEvaluationPanel(appt.getStudentID());
                             });
                         } else {
                             R9C2.setForeground(Color.gray);
@@ -308,9 +300,18 @@ public class EvaluatorFrame extends JPanel {
         bottomPanel.add(instruction,BorderLayout.WEST);
 
         //=========add all to this panel
+        JPanel schedulePanel = new JPanel(new BorderLayout());
+        schedulePanel.add(tabbedPane, BorderLayout.CENTER);
+        schedulePanel.add(bottomPanel, BorderLayout.SOUTH);
+
+        JPanel evaluationPanel = buildEvaluationPanel();
+        contentPanel.removeAll();
+        contentPanel.add(schedulePanel, "schedule");
+        contentPanel.add(evaluationPanel, "evaluation");
+        contentLayout.show(contentPanel, "schedule");
+
         add(topPanel, BorderLayout.NORTH);
-        add(tabbedPane, BorderLayout.CENTER);
-        add(bottomPanel, BorderLayout.SOUTH);
+        add(contentPanel, BorderLayout.CENTER);
         revalidate();
         repaint();
     }
@@ -331,6 +332,28 @@ public class EvaluatorFrame extends JPanel {
         btn.setBorderPainted(false);
         btn.setFocusable(false);
         return btn;
+    }
+
+    private JPanel buildEvaluationPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+
+        JPanel top = new JPanel(new BorderLayout());
+        top.setBorder(BorderFactory.createEmptyBorder(5,15,5,5));
+        evaluationTitle.setText("Evaluation");
+        JButton returnButton = new JButton("Return");
+        returnButton.addActionListener(e -> contentLayout.show(contentPanel, "schedule"));
+        top.add(evaluationTitle, BorderLayout.WEST);
+        top.add(returnButton, BorderLayout.EAST);
+
+        panel.add(top, BorderLayout.NORTH);
+        panel.add(new JLabel("Evaluation panel", SwingConstants.CENTER), BorderLayout.CENTER);
+        return panel;
+    }
+
+    private void showEvaluationPanel(String studentId) {
+        String displayId = studentId == null ? "" : studentId;
+        evaluationTitle.setText("Evaluation: " + displayId);
+        contentLayout.show(contentPanel, "evaluation");
     }
 
     private void showUnauthorizedPopup() {
