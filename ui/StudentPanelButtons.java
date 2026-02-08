@@ -6,8 +6,6 @@ import java.awt.Font;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 
-import util.GUI;
-
  // Util class for creating and styling buttons used in StudentPanel
 
 public class StudentPanelButtons {
@@ -56,12 +54,6 @@ public class StudentPanelButtons {
         button.setMaximumSize(new Dimension(100, 35));
         // button.setEnabled(true); [redundant]  
         button.setFocusPainted(false);
-
-        // hover effect to the button
-        // final Color normalBg = new Color(245, 245, 245);
-        // final Color hoverBg = new Color(173, 216, 230); // light blue
-        // GUI.addHoverBackground(button, normalBg, hoverBg);
-
         return button;
     }
     

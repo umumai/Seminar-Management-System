@@ -45,6 +45,17 @@ public class AppointmentFrame extends JPanel {
 
     public AppointmentFrame(JFrame frame) {
         this.frame=frame;
+        buildUi();
+    }
+
+    public void refreshPanel() {
+        removeAll();
+        buildUi();
+        revalidate();
+        repaint();
+    }
+
+    private void buildUi() {
         setLayout(new BorderLayout());
 
         

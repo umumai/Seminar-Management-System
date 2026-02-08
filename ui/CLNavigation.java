@@ -20,7 +20,6 @@ public class CLNavigation extends JFrame {
 
         // // Create screens
         EditSchedule editScheduleFrame = new EditSchedule(this);
-        ScheduleFrame viewScheduleFrame = new ScheduleFrame(this);
         CoordinatorFrame coordinatorFrame = new CoordinatorFrame(this, null);
         AppointmentFrame appointmentFrame = new AppointmentFrame(this);
         ReportFrame reportFrame = new ReportFrame(this);
@@ -29,7 +28,6 @@ public class CLNavigation extends JFrame {
 
         // // store screen into a single JPanel holding all the CardLayout (container)
         container.add(editScheduleFrame, "editScheduleFrame");
-        container.add(viewScheduleFrame, "viewScheduleFrame");
         container.add(coordinatorFrame,"coordinatorFrame");
         container.add(appointmentFrame,"appointmentFrame");
         container.add(reportFrame,"reportFrame");

@@ -71,8 +71,6 @@ public class EvaluatorFrame extends JPanel {
                 evalApptList.add(apt);
             }
         }
-        System.out.println("DEBUG: evaluatorId=" + evaluatorId + " totalAppointmentslinkedtoEvaluator=" + evalApptList.size());
-        
         Set<Integer> seenSessionIds = new HashSet<>();
         for (Appointment apt : evalApptList) {
             int sessionId = apt.getSessionID();

@@ -79,11 +79,11 @@ public class CoordinatorFrame extends JPanel {
         centerPanel.setBorder(BorderFactory.createEmptyBorder(110,50,140,50));
         centerPanel.setBackground(deepBlue);
         JButton newSeminarBtn = createSeminarActionBtn("new Seminar");
-        JButton studMngmentBtn = new JButton("student management");
+        JButton studMngmentBtn = new JButton("Appointment management");
         studMngmentBtn.addActionListener(e -> {
             ((LoginFrame) frame).showPanel("appointmentPanel");
         });
-        JButton scheduleMngmentBtn = new JButton("manage schedule");
+        JButton scheduleMngmentBtn = new JButton("View schedule");
         scheduleMngmentBtn.addActionListener(e -> {
             ((LoginFrame) frame).showPanel("editSchedulePanel");
         });

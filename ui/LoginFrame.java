@@ -19,6 +19,7 @@ public class LoginFrame extends JFrame {
     private ReportFrame reportPanelInstance; 
     private EvaluationFrame evaluationPanelInstance;
     private JPanel editSchedulePanelInstance;
+    private AppointmentFrame appointmentPanelInstance;
 
     public LoginFrame() {
         setTitle("Seminar Management System");
@@ -44,11 +45,11 @@ public class LoginFrame extends JFrame {
         evaluatorPanelInstance = new EvaluatorFrame(this, new Evaluator("EVA000", "Evaluator", "")); // dummy user
         JPanel evaluatorPanel = evaluatorPanelInstance;
         JPanel registerPanel = StudentRegisterPanel.createPanel(this);
-        JPanel scheduleFrame = new ScheduleFrame(this);
         editSchedulePanelInstance = new EditSchedule(this);
         reportPanelInstance = new ReportFrame(this);
         JPanel reportPanel = reportPanelInstance;
-        JPanel appointmentPanel = new AppointmentFrame(this);
+        appointmentPanelInstance = new AppointmentFrame(this);
+        JPanel appointmentPanel = appointmentPanelInstance;
         evaluationPanelInstance = new EvaluationFrame(this);
         JPanel evaluationPanel = evaluationPanelInstance;
 
@@ -58,7 +59,6 @@ public class LoginFrame extends JFrame {
         mainPanel.add(studentPanel, "StudentPanel");
         mainPanel.add(evaluatorPanel, "EvaluatorPanel");
         mainPanel.add(registerPanel, "RegisterPanel");
-        mainPanel.add(scheduleFrame, "schedulePanel");
         mainPanel.add(editSchedulePanelInstance, "editSchedulePanel");
         mainPanel.add(reportPanel, "reportPanel");
         mainPanel.add(appointmentPanel, "appointmentPanel");
@@ -171,14 +171,10 @@ public class LoginFrame extends JFrame {
             mainPanel.revalidate();
             mainPanel.repaint();
         }
-        cardLayout.show(mainPanel, panelName);
-    }
-
-    public void showReportPanel(String studentId) {
-        if (reportPanelInstance != null) {
-            reportPanelInstance.setCurrentStud(studentId);
+        if ("appointmentPanel".equals(panelName) && appointmentPanelInstance != null) {
+            appointmentPanelInstance.refreshPanel();
         }
-        cardLayout.show(mainPanel, "reportPanel");
+        cardLayout.show(mainPanel, panelName);
     }
 
     public void showReportPanel(String studentId, int sessionId) {
