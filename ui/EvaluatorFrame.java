@@ -15,7 +15,6 @@ public class EvaluatorFrame extends JPanel {
     private Evaluator currentUser;
     private final CardLayout contentLayout = new CardLayout();
     private final JPanel contentPanel = new JPanel(contentLayout);
-    private final JLabel evaluationTitle = new JLabel("Evaluation", SwingConstants.CENTER);
     public Color deepBlue = new Color(14,69,128);
     public Color deepRed = new Color(151, 32, 0);
     
@@ -139,99 +138,105 @@ public class EvaluatorFrame extends JPanel {
 
         for (Appointment appt : apptList) {
                 String time = appt.getTimeSlot();
+                String studentId = appt.getStudentID();
+                boolean isAssignedToMe = appt.getEvaluatorID() == null ? 
+                    currentUser.getId() == null : appt.getEvaluatorID().equals(currentUser.getId());
+                boolean isEvaluated = isAssignedToMe && currentUser != null && 
+                    DBHelper.isStudentEvaluated(studentId, currentUser.getId());
+                
                 switch (time) {
                     case "9":
-                        R2C2.setText(DBHelper.getNameByID(appt.getStudentID()));
+                        R2C2.setText(DBHelper.getNameByID(studentId));
                         R2C3.setText(DBHelper.getNameByID(appt.getEvaluatorID()));
-                        if (appt.getEvaluatorID() == null ? currentUser.getId() == null : appt.getEvaluatorID().equals(currentUser.getId()))
-                        {
-                            R2C2.addActionListener(e -> {
-                            showEvaluationPanel(appt.getStudentID());
-                            });
+                        if (isAssignedToMe) {
+                            if (isEvaluated) {
+                                R2C2.setBackground(new Color(144, 238, 144));
+                            }
+                            R2C2.addActionListener(e -> showEvaluationPanel(studentId));
                         } else {
                             R2C2.setForeground(Color.gray);
                         }
                         break;
                     case "10":
-                        R3C2.setText(DBHelper.getNameByID(appt.getStudentID()));
+                        R3C2.setText(DBHelper.getNameByID(studentId));
                         R3C3.setText(DBHelper.getNameByID(appt.getEvaluatorID()));
-                        if (appt.getEvaluatorID() == null ? currentUser.getId() == null : appt.getEvaluatorID().equals(currentUser.getId()))
-                        {
-                            R3C2.addActionListener(e -> {
-                            showEvaluationPanel(appt.getStudentID());
-                            });
+                        if (isAssignedToMe) {
+                            if (isEvaluated) {
+                                R3C2.setBackground(new Color(144, 238, 144));
+                            }
+                            R3C2.addActionListener(e -> showEvaluationPanel(studentId));
                         } else {
                             R3C2.setForeground(Color.gray);
                         }
                         break;
                     case "11":
-                        R4C2.setText(DBHelper.getNameByID(appt.getStudentID()));
+                        R4C2.setText(DBHelper.getNameByID(studentId));
                         R4C3.setText(DBHelper.getNameByID(appt.getEvaluatorID()));
-                        if (appt.getEvaluatorID() == null ? currentUser.getId() == null : appt.getEvaluatorID().equals(currentUser.getId()))
-                        {
-                            R4C2.addActionListener(e -> {
-                            showEvaluationPanel(appt.getStudentID());
-                            });
+                        if (isAssignedToMe) {
+                            if (isEvaluated) {
+                                R4C2.setBackground(new Color(144, 238, 144));
+                            }
+                            R4C2.addActionListener(e -> showEvaluationPanel(studentId));
                         } else {
                             R4C2.setForeground(Color.gray);
                         }
                         break;
                     case "12":
-                        R5C2.setText(DBHelper.getNameByID(appt.getStudentID()));
+                        R5C2.setText(DBHelper.getNameByID(studentId));
                         R5C3.setText(DBHelper.getNameByID(appt.getEvaluatorID()));
-                        if (appt.getEvaluatorID() == null ? currentUser.getId() == null : appt.getEvaluatorID().equals(currentUser.getId()))
-                        {
-                            R5C2.addActionListener(e -> {
-                            showEvaluationPanel(appt.getStudentID());
-                            });
+                        if (isAssignedToMe) {
+                            if (isEvaluated) {
+                                R5C2.setBackground(new Color(144, 238, 144));
+                            }
+                            R5C2.addActionListener(e -> showEvaluationPanel(studentId));
                         } else {
                             R5C2.setForeground(Color.gray);
                         }
                         break;
                     case "13":
-                        R6C2.setText(DBHelper.getNameByID(appt.getStudentID()));
+                        R6C2.setText(DBHelper.getNameByID(studentId));
                         R6C3.setText(DBHelper.getNameByID(appt.getEvaluatorID()));
-                        if (appt.getEvaluatorID() == null ? currentUser.getId() == null : appt.getEvaluatorID().equals(currentUser.getId()))
-                        {
-                            R6C2.addActionListener(e -> {
-                            showEvaluationPanel(appt.getStudentID());
-                            });
+                        if (isAssignedToMe) {
+                            if (isEvaluated) {
+                                R6C2.setBackground(new Color(144, 238, 144));
+                            }
+                            R6C2.addActionListener(e -> showEvaluationPanel(studentId));
                         } else {
                             R6C2.setForeground(Color.gray);
                         }
                         break;
                     case "14":
-                        R7C2.setText(DBHelper.getNameByID(appt.getStudentID()));
+                        R7C2.setText(DBHelper.getNameByID(studentId));
                         R7C3.setText(DBHelper.getNameByID(appt.getEvaluatorID()));
-                        if (appt.getEvaluatorID() == null ? currentUser.getId() == null : appt.getEvaluatorID().equals(currentUser.getId()))
-                        {
-                            R7C2.addActionListener(e -> {
-                            showEvaluationPanel(appt.getStudentID());
-                            });
+                        if (isAssignedToMe) {
+                            if (isEvaluated) {
+                                R7C2.setBackground(new Color(144, 238, 144));
+                            }
+                            R7C2.addActionListener(e -> showEvaluationPanel(studentId));
                         } else {
                             R7C2.setForeground(Color.gray);
                         }
                         break;
                     case "15":
-                        R8C2.setText(DBHelper.getNameByID(appt.getStudentID()));
+                        R8C2.setText(DBHelper.getNameByID(studentId));
                         R8C3.setText(DBHelper.getNameByID(appt.getEvaluatorID()));
-                        if (appt.getEvaluatorID() == null ? currentUser.getId() == null : appt.getEvaluatorID().equals(currentUser.getId()))
-                        {
-                            R8C2.addActionListener(e -> {
-                            showEvaluationPanel(appt.getStudentID());
-                            });
+                        if (isAssignedToMe) {
+                            if (isEvaluated) {
+                                R8C2.setBackground(new Color(144, 238, 144));
+                            }
+                            R8C2.addActionListener(e -> showEvaluationPanel(studentId));
                         } else {
                             R8C2.setForeground(Color.gray);
                         }
                         break;
                     case "16":
-                        R9C2.setText(DBHelper.getNameByID(appt.getStudentID()));
+                        R9C2.setText(DBHelper.getNameByID(studentId));
                         R9C3.setText(DBHelper.getNameByID(appt.getEvaluatorID()));
-                        if (appt.getEvaluatorID() == null ? currentUser.getId() == null : appt.getEvaluatorID().equals(currentUser.getId()))
-                        {
-                            R9C2.addActionListener(e -> {
-                            showEvaluationPanel(appt.getStudentID());
-                            });
+                        if (isAssignedToMe) {
+                            if (isEvaluated) {
+                                R9C2.setBackground(new Color(144, 238, 144));
+                            }
+                            R9C2.addActionListener(e -> showEvaluationPanel(studentId));
                         } else {
                             R9C2.setForeground(Color.gray);
                         }
@@ -323,6 +328,13 @@ public class EvaluatorFrame extends JPanel {
         btn.setForeground(deepBlue);
         return btn;
     }
+    
+    public JButton evaluatedBox(String text){
+        JButton btn = new JButton(text);
+        btn.setBackground(new Color(144, 238, 144)); // Light green
+        btn.setForeground(deepBlue);
+        return btn;
+    }
 
     public JButton headerBox(String text){
         JButton btn = new JButton(text);
@@ -334,35 +346,25 @@ public class EvaluatorFrame extends JPanel {
         return btn;
     }
 
+    private EvaluationFrame evaluationFrameInstance;
+    
     private JPanel buildEvaluationPanel() {
-        JPanel panel = new JPanel(new BorderLayout());
+        evaluationFrameInstance = new EvaluationFrame(frame);
+        evaluationFrameInstance.setEvaluator(currentUser);
+        evaluationFrameInstance.setOnReturnToDashboard(this::showScheduleAndRefresh);
+        return evaluationFrameInstance;
+    }
 
-        JPanel top = new JPanel(new BorderLayout());
-        top.setBorder(BorderFactory.createEmptyBorder(5,15,5,5));
-        evaluationTitle.setText("Evaluation");
-        JButton returnButton = new JButton("Return");
-        returnButton.addActionListener(e -> contentLayout.show(contentPanel, "schedule"));
-        top.add(evaluationTitle, BorderLayout.WEST);
-        top.add(returnButton, BorderLayout.EAST);
-
-        panel.add(top, BorderLayout.NORTH);
-        panel.add(new JLabel("Evaluation panel", SwingConstants.CENTER), BorderLayout.CENTER);
-        return panel;
+    private void showScheduleAndRefresh() {
+        buildUI();
     }
 
     private void showEvaluationPanel(String studentId) {
-        String displayId = studentId == null ? "" : studentId;
-        evaluationTitle.setText("Evaluation: " + displayId);
+        if (evaluationFrameInstance != null) {
+            evaluationFrameInstance.setEvaluator(currentUser);
+            evaluationFrameInstance.setCurrentStud(studentId);
+        }
         contentLayout.show(contentPanel, "evaluation");
-    }
-
-    private void showUnauthorizedPopup() {
-        JOptionPane.showMessageDialog(
-            this,
-            "You are not assigned to this student.",
-            "Access denied",
-            JOptionPane.WARNING_MESSAGE
-        );
     }
 
     

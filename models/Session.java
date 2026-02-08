@@ -30,7 +30,7 @@ public class Session {
         return sessionType;
     }
     
-    public String getDetails() { //returns the session information in a formatted string
-        return String.format("Date: %s | Venue: %s | Type: %s", date, venue, sessionType);
+    public String getDetails() { //returns the session information in a formatted string (presentation type is chosen by student in registration form)
+        return String.format("Date: %s | Venue: %s", date, venue);
     }
 }

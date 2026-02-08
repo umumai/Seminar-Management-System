@@ -302,17 +302,76 @@ public class StudentPanel {
         JLabel statusLabel = new JLabel("Status: " + submissionStatus);
         statusLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
         
-        // Award Result
-        JLabel awardLabel = new JLabel("Award Result: " + awardResult);
-        awardLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
-        
         statusCard.add(seminarIdLabel);
         statusCard.add(Box.createVerticalStrut(10));
         statusCard.add(detailsLabel);
         statusCard.add(Box.createVerticalStrut(15));
         statusCard.add(statusLabel);
         statusCard.add(Box.createVerticalStrut(10));
-        statusCard.add(awardLabel);
+        
+        // Show marks, comments, award only after coordinator has finalised (submission.status = Completed)
+        boolean isFinalised = currentUser != null && "Completed".equals(DBHelper.getStudentSubmissionStatus(currentUser.getId()));
+        if (isFinalised) {
+            DBHelper.StudentEvaluationResults results = DBHelper.getStudentEvaluationResults(currentUser.getId());
+            if (results != null) {
+                // Evaluation Results Section
+                JLabel resultsTitleLabel = new JLabel("Evaluation Results:");
+                resultsTitleLabel.setFont(new Font("SansSerif", Font.BOLD, 14));
+                statusCard.add(resultsTitleLabel);
+                statusCard.add(Box.createVerticalStrut(10));
+                
+                // Scores
+                JPanel scoresPanel = new JPanel(new GridLayout(4, 2, 5, 5));
+                scoresPanel.setBackground(Color.WHITE);
+                scoresPanel.add(new JLabel("Problem Clarity:"));
+                scoresPanel.add(new JLabel(String.valueOf(results.avgClarityScore) + "/5"));
+                scoresPanel.add(new JLabel("Methodology:"));
+                scoresPanel.add(new JLabel(String.valueOf(results.avgMethodologyScore) + "/5"));
+                scoresPanel.add(new JLabel("Results:"));
+                scoresPanel.add(new JLabel(String.valueOf(results.avgResultsScore) + "/5"));
+                scoresPanel.add(new JLabel("Presentation:"));
+                scoresPanel.add(new JLabel(String.valueOf(results.avgPresentationScore) + "/5"));
+                
+                statusCard.add(scoresPanel);
+                statusCard.add(Box.createVerticalStrut(10));
+                
+                // Comments
+                if (results.comments != null && !results.comments.trim().isEmpty()) {
+                    JLabel commentsTitleLabel = new JLabel("Comments:");
+                    commentsTitleLabel.setFont(new Font("SansSerif", Font.BOLD, 12));
+                    statusCard.add(commentsTitleLabel);
+                    
+                    JTextArea commentsArea = new JTextArea(results.comments);
+                    commentsArea.setEditable(false);
+                    commentsArea.setLineWrap(true);
+                    commentsArea.setWrapStyleWord(true);
+                    commentsArea.setBackground(Color.WHITE);
+                    commentsArea.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+                    JScrollPane commentsScroll = new JScrollPane(commentsArea);
+                    commentsScroll.setPreferredSize(new Dimension(0, 80));
+                    statusCard.add(commentsScroll);
+                    statusCard.add(Box.createVerticalStrut(10));
+                }
+                
+                // Award Result
+                JLabel awardLabel = new JLabel("Award: " + results.award);
+                awardLabel.setFont(new Font("SansSerif", Font.BOLD, 14));
+                if (!"No award".equals(results.award)) {
+                    awardLabel.setForeground(new Color(0, 150, 0));
+                }
+                statusCard.add(awardLabel);
+            } else {
+                // Award Result (fallback if no results yet)
+                JLabel awardLabel = new JLabel("Award Result: " + awardResult);
+                awardLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
+                statusCard.add(awardLabel);
+            }
+        } else {
+            // Award Result (pending)
+            JLabel awardLabel = new JLabel("Award Result: " + awardResult);
+            awardLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
+            statusCard.add(awardLabel);
+        }
         
         statusPanel.add(statusCard, BorderLayout.CENTER);
         
@@ -613,8 +672,11 @@ public class StudentPanel {
                 sessionId
             );
 
-            //give appointment to student
+            // create appointment so coordinator can assign evaluator; status "Submitted" shows in Appnt mangemntent
             DBHelper.insertAppointment(sessionId, studentId);
+
+            // confirm the application submit for coordinator on terminal output
+            System.out.println("Successfully submitted application for " + studentId + " Status = Submitted!");
             
             // Update local state - only set registeredSeminar on successful submission
             registeredSeminar = selectedSeminarTemp;
@@ -659,11 +721,20 @@ public class StudentPanel {
     public void setUser(User user) {
         currentUser = user;
         
-        // Reset all user-specific state when switching users
-        registeredSeminar = null;
+        // Reset transient state only
         selectedSeminarTemp = null;
-        submissionStatus = null;
-        awardResult = "Pending";
+        
+        // Load student's registration and submission status from database before building UI
+        if (user != null) {
+            registeredSeminar = null;
+            submissionStatus = null;
+            awardResult = "Pending";
+            loadStudentData(user.getId());
+        } else {
+            registeredSeminar = null;
+            submissionStatus = null;
+            awardResult = "Pending";
+        }
         
         // Clear all form fields
         clearRegistrationForm();
@@ -674,7 +745,7 @@ public class StudentPanel {
             JPanel newTopPanel = createTopPanel();
             studentPanel.add(newTopPanel, BorderLayout.NORTH, 0);
             
-            // Refresh all panels to show user-specific data
+            // Refresh all panels to show user-specific data (now using loaded state)
             refreshRegisterPanel();
             refreshStatusPanel();
             refreshRegistrationFormPanel();
@@ -686,11 +757,6 @@ public class StudentPanel {
             
             studentPanel.revalidate();
             studentPanel.repaint();
-        }
-        
-        // Load student's registration and submission status from database
-        if (user != null) {
-            loadStudentData(user.getId());
         }
     }
     
@@ -712,10 +778,10 @@ public class StudentPanel {
                 registeredSeminar = seminar;
             }
             
-            // Load submission status
-            String status = DBHelper.getStudentSubmissionStatus(studentId);
-            if (status != null) {
-                submissionStatus = status;
+            // Load display status for label: Submitted | Under evaluation | Completed
+            String displayStatus = DBHelper.getStudentDisplayStatus(studentId);
+            if (displayStatus != null) {
+                submissionStatus = displayStatus;
             }
             
             // Load award result

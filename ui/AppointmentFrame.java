@@ -16,7 +16,33 @@ public class AppointmentFrame extends JPanel {
     static String state = "edit";
     public Color deepBlue = new Color(14,69,128);
     private List<Appointment> apptList;
-    
+
+    // ----- adjustd umu -
+
+    private String deriveAppointmentStatus(Appointment appt) {
+        // Keep evaluated as-is (set by evaluator submission flow)
+        if (appt != null && appt.getStatus() != null && "evaluated".equalsIgnoreCase(appt.getStatus())) {
+            return "Evaluated";
+        }
+
+        boolean evaluatorAssigned =
+            appt != null &&
+            appt.getEvaluatorID() != null &&
+            !appt.getEvaluatorID().trim().isEmpty();
+
+        boolean timeAssigned =
+            appt != null &&
+            appt.getTimeSlot() != null &&
+            !appt.getTimeSlot().trim().isEmpty() &&
+            !"0".equals(appt.getTimeSlot());
+
+        if (evaluatorAssigned && timeAssigned) {
+            return "Under Evaluation";
+        }
+        return "Unassigned";
+    }
+    // ----end 
+
     public AppointmentFrame(JFrame frame) {
         this.frame=frame;
         setLayout(new BorderLayout());
@@ -67,8 +93,9 @@ public class AppointmentFrame extends JPanel {
         detailsPanel.add(new JLabel("Venue : " + session.getVenue()));
         // detailsPanel.add(new JLabel("Presentation Type : " + session.getSessionType()));
         
-        //table panel
-        JPanel tablePanel = new JPanel(new GridLayout(9, 3, 1, 1));
+        // table panel (5 columns including Status) ---umu
+        // JPanel tablePanel = new JPanel(new GridLayout(9, 3, 1, 1));
+        JPanel tablePanel = new JPanel(new GridLayout(9, 5, 1, 1));
         tablePanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
 
         //header row
@@ -90,12 +117,13 @@ public class AppointmentFrame extends JPanel {
             R2C2.setText(DBHelper.getNameByID(currentAppt.getStudentID()));
             R2C3.addActionListener(e -> {
                 if ("save".equals(state)) {
-                    changeEvalName(R2C3, currentAppt);
+                    // changeEvalName(R2C3, currentAppt); --umu
+                    changeEvalName(R2C3, R2C5, currentAppt);
                 }
             });
             R2C4.addActionListener(e -> {
                 if ("save".equals(state)) {
-                    changeTime(R2C4, currentAppt, sessionAppointments);
+                    changeTime(R2C4, R2C5, currentAppt, sessionAppointments);
                 }
             });
             if ((currentAppt.getEvaluatorID()) != null){
@@ -126,12 +154,12 @@ public class AppointmentFrame extends JPanel {
             R3C2.setText(DBHelper.getNameByID(currentAppt.getStudentID()));
             R3C3.addActionListener(e -> {
                 if ("save".equals(state)) {
-                    changeEvalName(R3C3, currentAppt);
+                    changeEvalName(R3C3, R3C5, currentAppt); // so it updates status column, bila the first mentioned row dah filled the status row update also
                 }
             });
             R3C4.addActionListener(e -> {
                 if ("save".equals(state)) {
-                    changeTime(R3C4, currentAppt, sessionAppointments);
+                    changeTime(R3C4, R3C5, currentAppt, sessionAppointments);
                 }
             });
             if ((currentAppt.getEvaluatorID()) != null){
@@ -161,12 +189,12 @@ public class AppointmentFrame extends JPanel {
             R4C2.setText(DBHelper.getNameByID(currentAppt.getStudentID()));
             R4C3.addActionListener(e -> {
                 if ("save".equals(state)) {
-                    changeEvalName(R4C3, currentAppt);
+                    changeEvalName(R4C3, R4C5, currentAppt);
                 }
             });
             R4C4.addActionListener(e -> {
                 if ("save".equals(state)) {
-                    changeTime(R4C4, currentAppt, sessionAppointments);
+                    changeTime(R4C4, R4C5, currentAppt, sessionAppointments);
                 }
             });
             if ((currentAppt.getEvaluatorID()) != null){
@@ -197,12 +225,12 @@ public class AppointmentFrame extends JPanel {
             R5C2.setText(DBHelper.getNameByID(currentAppt.getStudentID()));
             R5C3.addActionListener(e -> {
                 if ("save".equals(state)) {
-                    changeEvalName(R5C3, currentAppt);
+                    changeEvalName(R5C3, R5C5, currentAppt);
                 }
             });
             R5C4.addActionListener(e -> {
                 if ("save".equals(state)) {
-                    changeTime(R5C4, currentAppt, sessionAppointments);
+                    changeTime(R5C4, R5C5, currentAppt, sessionAppointments);
                 }
             });
             if ((currentAppt.getEvaluatorID()) != null){
@@ -233,12 +261,12 @@ public class AppointmentFrame extends JPanel {
             R6C2.setText(DBHelper.getNameByID(currentAppt.getStudentID()));
             R6C3.addActionListener(e -> {
                 if ("save".equals(state)) {
-                    changeEvalName(R6C3, currentAppt);
+                    changeEvalName(R6C3, R6C5, currentAppt);
                 }
             });
             R6C4.addActionListener(e -> {
                 if ("save".equals(state)) {
-                    changeTime(R6C4, currentAppt, sessionAppointments);
+                    changeTime(R6C4, R6C5, currentAppt, sessionAppointments);
                 }
             });
             if ((currentAppt.getEvaluatorID()) != null){
@@ -269,12 +297,12 @@ public class AppointmentFrame extends JPanel {
             R7C2.setText(DBHelper.getNameByID(currentAppt.getStudentID()));
             R7C3.addActionListener(e -> {
                 if ("save".equals(state)) {
-                    changeEvalName(R7C3, currentAppt);
+                    changeEvalName(R7C3, R7C5, currentAppt);
                 }
             });
             R7C4.addActionListener(e -> {
                 if ("save".equals(state)) {
-                    changeTime(R7C4, currentAppt, sessionAppointments);
+                    changeTime(R7C4, R7C5, currentAppt, sessionAppointments);
                 }
             });
             if ((currentAppt.getEvaluatorID()) != null){
@@ -305,12 +333,12 @@ public class AppointmentFrame extends JPanel {
             R8C2.setText(DBHelper.getNameByID(currentAppt.getStudentID()));
             R8C3.addActionListener(e -> {
                 if ("save".equals(state)) {
-                    changeEvalName(R8C3, currentAppt);
+                    changeEvalName(R8C3, R8C5, currentAppt);
                 }
             });
             R8C4.addActionListener(e -> {
                 if ("save".equals(state)) {
-                    changeTime(R8C4, currentAppt, sessionAppointments);
+                    changeTime(R8C4, R8C5, currentAppt, sessionAppointments);
                 }
             });
             if ((currentAppt.getEvaluatorID()) != null){
@@ -341,12 +369,12 @@ public class AppointmentFrame extends JPanel {
             R9C2.setText(DBHelper.getNameByID(currentAppt.getStudentID()));
             R9C3.addActionListener(e -> {
                 if ("save".equals(state)) {
-                    changeEvalName(R9C3, currentAppt);
+                    changeEvalName(R9C3, R9C5, currentAppt);
                 }
             });
             R9C4.addActionListener(e -> {
                 if ("save".equals(state)) {
-                    changeTime(R9C4, currentAppt, sessionAppointments);
+                    changeTime(R9C4, R9C5, currentAppt, sessionAppointments);
                 }
             });
             if ((currentAppt.getEvaluatorID()) != null){
@@ -426,11 +454,21 @@ public class AppointmentFrame extends JPanel {
         JButton saveButton = buttonEdit();
         JLabel instruction = new JLabel("Click edit to assign evaluator & time.");
         instruction.setForeground(Color.GRAY);
+        
+        // Finalise Report button
+        JButton finaliseButton = new JButton("Finalise Report");
+        finaliseButton.setBackground(new Color(0, 150, 0));
+        finaliseButton.setForeground(Color.WHITE);
+        finaliseButton.setFocusPainted(false);
+        
         //bottom panel
         JPanel bottomPanel = new JPanel(new BorderLayout());
         bottomPanel.setBorder(BorderFactory.createEmptyBorder(0, 20, 10, 20));
-        bottomPanel.add(saveButton,BorderLayout.EAST);        
-        bottomPanel.add(instruction,BorderLayout.WEST); 
+        JPanel rightButtonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        rightButtonsPanel.add(finaliseButton);
+        rightButtonsPanel.add(saveButton);
+        bottomPanel.add(instruction, BorderLayout.WEST);
+        bottomPanel.add(rightButtonsPanel, BorderLayout.EAST);
         mainPanel.add(bottomPanel, BorderLayout.SOUTH);
         } else {
             JLabel text = new JLabel("Information unavailable as student not registered to this seminar yet.", SwingConstants.CENTER);
@@ -454,7 +492,7 @@ public class AppointmentFrame extends JPanel {
     }
 
     //===============================ActionListener=======================================
-    private void changeEvalName(JButton btn, Appointment appt) {
+    private void changeEvalName(JButton btn, JButton statusBtn, Appointment appt) { //umu added statusBtn to update status column
 
     //convert the string into a combobox
     ArrayList<String> evaluatorList = new ArrayList<>();
@@ -498,6 +536,9 @@ public class AppointmentFrame extends JPanel {
                     System.err.println("DEBUG : Updating evaluator for " + appt.getStudentID() +
                 " -> EvaluatorID: " + appt.getEvaluatorID());
                     try {
+                        String derivedStatus = deriveAppointmentStatus(appt); //umu added derivedStatus to make sure update status column
+                        appt.setStatus(derivedStatus);
+                        statusBtn.setText(derivedStatus);
                         DBHelper.updateAppointment(appt.getStudentID(), appt.getEvaluatorID(), appt.getTimeSlot(), appt.getStatus());
                     } catch (SQLException ex) {
                         System.getLogger(AppointmentFrame.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
@@ -510,7 +551,7 @@ public class AppointmentFrame extends JPanel {
         }
     }
 
-    private void changeTime(JButton btn, Appointment appt, List<Appointment> sessionAppointments) {
+    private void changeTime(JButton btn, JButton statusBtn, Appointment appt, List<Appointment> sessionAppointments) { //umu added statusBtn 
 
     //convert the string into a combobox
     ArrayList<String> availTime = new ArrayList<>();
@@ -555,11 +596,14 @@ public class AppointmentFrame extends JPanel {
                     System.out.println(choice + " selected");
                     btn.setText(choice + ":00");
                     btn.setForeground(deepBlue);
-                    appt.setEvaluatorID(DBHelper.getIDbyName(choice));
+                    // appt.setEvaluatorID(DBHelper.getIDbyName(choice)); --umu try out to avoid error
                     appt.setTimeSlot(choice);
                     System.err.println("DEBUG : Updating time for " + appt.getStudentID() +
                 " -> Time: " + appt.getTimeSlot());
                     try {
+                        String derivedStatus = deriveAppointmentStatus(appt); //umu
+                        appt.setStatus(derivedStatus);
+                        statusBtn.setText(derivedStatus);
                         DBHelper.updateAppointment(appt.getStudentID(), appt.getEvaluatorID(), appt.getTimeSlot(), appt.getStatus());
                     } catch (SQLException ex) {
                         System.getLogger(AppointmentFrame.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
@@ -587,7 +631,6 @@ public class AppointmentFrame extends JPanel {
         btn.setBackground(Color.white);
         btn.setForeground(deepBlue);
         btn.setFocusPainted(false);
-        // btn.setBorderPainted(true);
         return btn;
     }
 

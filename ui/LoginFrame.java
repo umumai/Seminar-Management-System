@@ -4,10 +4,8 @@ import Database.DBHelper;
 import java.awt.*;
 import javax.swing.*;
 import models.Coordinator;
-import models.Evaluation;
 import models.Evaluator;
 import models.User;
-import util.TestDevMode;
 
 public class LoginFrame extends JFrame {
     private final JTextField nameField = new JTextField(12);
@@ -87,14 +85,6 @@ public class LoginFrame extends JFrame {
 
         c.gridx = 0; c.gridy = 2; c.gridwidth = 2; p.add(loginBtn, c);
         c.gridy = 3; p.add(regBtn, c);
-
-        // DEV MODE: Quick access buttons (remove later)
-        JPanel devPanel = TestDevMode.createDevPanel(this);
-        c.gridy = 4; c.gridwidth = 2;
-        p.add(devPanel, c);
-        // DEV MODE: end
-
-
 
         // getRootPane().setDefaultButton(loginBtn); // press "Enter" to login
 

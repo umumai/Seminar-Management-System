@@ -12,10 +12,6 @@ public class main {
             LoginFrame lf = new LoginFrame(); // open login frame
             lf.setVisible(true);
             CLNavigation cl = new CLNavigation();
-                        
-            // DEV MODE (Switch to any panel name to open it)
-            // lf.showPanel("CoordinatorPanel");  // open coordinator panel
-
         });
     }
 }
