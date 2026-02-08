@@ -11,6 +11,7 @@ public class ReportFrame extends JPanel {
     private final JLabel evaluatorNameLabel;
     private final JLabel presentationTypeLabel;
     private final JLabel sessionLabel;
+    private final JLabel awardLabel;
     private final JLabel clarityLabel;
     private final JLabel methodologyLabel;
     private final JLabel resultsLabel;
@@ -39,7 +40,7 @@ public class ReportFrame extends JPanel {
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
 
         // ===== Header Info Panel =====
-        JPanel infoPanel = new JPanel(new GridLayout(4, 2, 10, 8));
+        JPanel infoPanel = new JPanel(new GridLayout(5, 2, 10, 8));
         infoPanel.setBorder(BorderFactory.createTitledBorder("Presentation Details"));
 
         infoPanel.add(new JLabel("Student Name:"));
@@ -57,6 +58,10 @@ public class ReportFrame extends JPanel {
         infoPanel.add(new JLabel("Session:"));
         sessionLabel = new JLabel("-");
         infoPanel.add(sessionLabel);
+
+        infoPanel.add(new JLabel("Award:"));
+        awardLabel = new JLabel("-");
+        infoPanel.add(awardLabel);
 
         // ===== Scores Panel =====
         JPanel scorePanel = new JPanel(new GridLayout(4, 2, 10, 8));
@@ -76,7 +81,6 @@ public class ReportFrame extends JPanel {
 
         scorePanel.add(new JLabel("Presentation:"));
         presentationLabel = new JLabel("-");
-        this.commentsArea = new JTextArea();
         scorePanel.add(presentationLabel);
 
         centerPanel.add(infoPanel);
@@ -93,6 +97,7 @@ public class ReportFrame extends JPanel {
         commentsArea.setEditable(false);
         commentsArea.setLineWrap(true);
         commentsArea.setWrapStyleWord(true);
+        this.commentsArea = commentsArea;
 
         commentPanel.add(new JScrollPane(commentsArea), BorderLayout.CENTER);
         add(commentPanel, BorderLayout.SOUTH);
@@ -117,6 +122,42 @@ public class ReportFrame extends JPanel {
         presentationLabel.setText(String.valueOf(scores.getPresentationScore()));
 
         commentsArea.setText(scores.getComments());
+        awardLabel.setText("Award: " + DBHelper.getStudentAwardResult(ID));
+        Session s = DBHelper.getStudentRegisteredSeminar(ID);
+        sessionLabel.setText(s != null ? s.getSessionID() : "-");
+        revalidate();
+        repaint();
+    }
+
+    public void setCurrentStud(String studentId, int sessionId) {
+        String ID = studentId == null ? "" : studentId;
+        currentStud = DBHelper.getUserbyID(ID);
+        scores = DBHelper.getEvaluationByStudentId(ID, sessionId);
+
+        reportLabel.setText("Student " + ID + " report");
+        studentNameLabel.setText(currentStud != null ? currentStud.getName() : "-");
+
+        Session s = DBHelper.getSession(sessionId);
+        sessionLabel.setText(s != null ? s.getSessionID() : ("SEM" + String.format("%03d", sessionId)));
+
+        String award = DBHelper.getStudentAwardResult(ID, sessionId);
+        awardLabel.setText(award != null ? award : "-");
+
+        if (scores != null) {
+            clarityLabel.setText(String.valueOf(scores.getClarityScore()));
+            methodologyLabel.setText(String.valueOf(scores.getMethodologyScore()));
+            resultsLabel.setText(String.valueOf(scores.getResultsScore()));
+            presentationLabel.setText(String.valueOf(scores.getPresentationScore()));
+            commentsArea.setText(scores.getComments());
+        } else {
+            clarityLabel.setText("-");
+            methodologyLabel.setText("-");
+            resultsLabel.setText("-");
+            presentationLabel.setText("-");
+            commentsArea.setText("No evaluation found for this session.");
+        }
+
+        System.out.println("ReportView: loaded (student=" + ID + ", session=SEM" + String.format("%03d", sessionId) + ", award=" + award + ")");
         revalidate();
         repaint();
     }

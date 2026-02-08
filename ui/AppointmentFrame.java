@@ -66,6 +66,7 @@ public class AppointmentFrame extends JPanel {
         int sessionList = DBHelper.getSessionCount();
         System.err.println("DEBUG : Total session exist in appointment management = " + sessionList);
         for (int i = 1; i <= sessionList; i++) {
+            final int sessionId = i; // umu added sessionId to pass to other functions
             JPanel mainPanel = new JPanel(new BorderLayout());
             // Create Appointment objects for each appointment_id in the database
             apptList = DBHelper.getAppointmentsbySession(i);
@@ -145,7 +146,7 @@ public class AppointmentFrame extends JPanel {
             R2C6.setText("Unavailable");
             if ("Evaluated".equalsIgnoreCase(currentAppt.getStatus())) {
                 R2C6.setText("View Report");
-                R2C6.addActionListener(e -> ((LoginFrame) frame).showReportPanel(currentAppt.getStudentID()));
+                R2C6.addActionListener(e -> ((LoginFrame) frame).showReportPanel(currentAppt.getStudentID(), sessionId)); // umu added sessionId 
             }
         }
 
@@ -186,7 +187,7 @@ public class AppointmentFrame extends JPanel {
             R3C6.setText("Unavailable");
             if ("Evaluated".equalsIgnoreCase(currentAppt.getStatus())) {
                 R3C6.setText("View Report");
-                R3C6.addActionListener(e -> ((LoginFrame) frame).showReportPanel(currentAppt.getStudentID()));
+                R3C6.addActionListener(e -> ((LoginFrame) frame).showReportPanel(currentAppt.getStudentID(), sessionId));
             }
         }
 
@@ -227,7 +228,7 @@ public class AppointmentFrame extends JPanel {
             R4C6.setText("Unavailable");
             if ("Evaluated".equalsIgnoreCase(currentAppt.getStatus())) {
                 R4C6.setText("View Report");
-                R4C6.addActionListener(e -> ((LoginFrame) frame).showReportPanel(currentAppt.getStudentID()));
+                R4C6.addActionListener(e -> ((LoginFrame) frame).showReportPanel(currentAppt.getStudentID(), sessionId));
             }
         }
 
@@ -269,7 +270,7 @@ public class AppointmentFrame extends JPanel {
             R5C6.setText("Unavailable");
             if ("Evaluated".equalsIgnoreCase(currentAppt.getStatus())) {
                 R5C6.setText("View Report");
-                R5C6.addActionListener(e -> ((LoginFrame) frame).showReportPanel(currentAppt.getStudentID()));
+                R5C6.addActionListener(e -> ((LoginFrame) frame).showReportPanel(currentAppt.getStudentID(), sessionId));
             }
         }
 
@@ -311,7 +312,7 @@ public class AppointmentFrame extends JPanel {
             R6C6.setText("Unavailable");
             if ("Evaluated".equalsIgnoreCase(currentAppt.getStatus())) {
                 R6C6.setText("View Report");
-                R6C6.addActionListener(e -> ((LoginFrame) frame).showReportPanel(currentAppt.getStudentID()));
+                R6C6.addActionListener(e -> ((LoginFrame) frame).showReportPanel(currentAppt.getStudentID(), sessionId));
             }
         }
 
@@ -353,7 +354,7 @@ public class AppointmentFrame extends JPanel {
             R7C6.setText("Unavailable");
             if ("Evaluated".equalsIgnoreCase(currentAppt.getStatus())) {
                 R7C6.setText("View Report");
-                R7C6.addActionListener(e -> ((LoginFrame) frame).showReportPanel(currentAppt.getStudentID()));
+                R7C6.addActionListener(e -> ((LoginFrame) frame).showReportPanel(currentAppt.getStudentID(), sessionId));
             }
         }
 
@@ -395,7 +396,7 @@ public class AppointmentFrame extends JPanel {
             R8C6.setText("Unavailable");
             if ("Evaluated".equalsIgnoreCase(currentAppt.getStatus())) {
                 R8C6.setText("View Report");
-                R8C6.addActionListener(e -> ((LoginFrame) frame).showReportPanel(currentAppt.getStudentID()));
+                R8C6.addActionListener(e -> ((LoginFrame) frame).showReportPanel(currentAppt.getStudentID(), sessionId));
             }
         }
 
@@ -437,7 +438,7 @@ public class AppointmentFrame extends JPanel {
             R9C6.setText("Unavailable");
             if ("Evaluated".equalsIgnoreCase(currentAppt.getStatus())) {
                 R9C6.setText("View Report");
-                R9C6.addActionListener(e -> ((LoginFrame) frame).showReportPanel(currentAppt.getStudentID()));
+                R9C6.addActionListener(e -> ((LoginFrame) frame).showReportPanel(currentAppt.getStudentID(), sessionId));
             }
         }
 
@@ -517,6 +518,23 @@ public class AppointmentFrame extends JPanel {
         finaliseButton.setBackground(new Color(0, 150, 0));
         finaliseButton.setForeground(Color.WHITE);
         finaliseButton.setFocusPainted(false);
+        // Finalise Report button action listener -- umu
+        finaliseButton.addActionListener(e -> {
+            // Finalise Session Report
+            boolean success = DBHelper.finaliseSessionReport(sessionId);
+            if (!success) {
+                JOptionPane.showMessageDialog(this, "All presenters must be evaluated before finalising.", "Unable to finalise", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            JOptionPane.showMessageDialog(
+                this,
+                "Session finalised. Awards published and results unlocked.",
+                "Finalised",
+                JOptionPane.INFORMATION_MESSAGE
+            );
+            finaliseButton.setEnabled(false);
+            finaliseButton.setText("Finalised");
+        });
         
         //bottom panel
         JPanel bottomPanel = new JPanel(new BorderLayout());

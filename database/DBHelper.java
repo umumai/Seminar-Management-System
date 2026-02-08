@@ -27,7 +27,8 @@ public class DBHelper {
             // student_profile table
             st.execute("CREATE TABLE IF NOT EXISTS student_profile(student_id TEXT PRIMARY KEY, supervisor_name TEXT, research_title TEXT, abstract TEXT, presentation_type TEXT, FOREIGN KEY (student_id) REFERENCES users(id))");
             // submission table
-            st.execute("CREATE TABLE IF NOT EXISTS submission(submission_id INTEGER PRIMARY KEY AUTOINCREMENT, student_id TEXT, filepath TEXT, status TEXT)");
+            // NOTE: session_id is added via migration for existing DBs.
+            st.execute("CREATE TABLE IF NOT EXISTS submission(submission_id INTEGER PRIMARY KEY AUTOINCREMENT, student_id TEXT, session_id INTEGER, filepath TEXT, status TEXT)");
             // session for presenter (session_id, student_id)
             st.execute("CREATE TABLE IF NOT EXISTS session_presenter(session_id INTEGER, student_id TEXT, PRIMARY KEY (session_id, student_id))");
             // evaluation table
@@ -35,7 +36,12 @@ public class DBHelper {
             // appointments table
             st.execute("CREATE TABLE IF NOT EXISTS appointments(appointment_id INTEGER PRIMARY KEY AUTOINCREMENT, session_id INTEGER, student_id TEXT, evaluator_id TEXT, time TEXT, status TEXT, FOREIGN KEY (session_id) REFERENCES session(session_id), FOREIGN KEY (student_id) REFERENCES users(id), FOREIGN KEY (evaluator_id) REFERENCES users(id))");
             // award table (award_id, student_id, award_type, created_at)
-            st.execute("CREATE TABLE IF NOT EXISTS award(award_id INTEGER PRIMARY KEY AUTOINCREMENT, student_id TEXT, award_type TEXT, score REAL, created_at TEXT DEFAULT CURRENT_TIMESTAMP)");
+            // NOTE: session_id/submission_id are added via migration for existing DBs.
+            st.execute("CREATE TABLE IF NOT EXISTS award(award_id INTEGER PRIMARY KEY AUTOINCREMENT, student_id TEXT, session_id INTEGER, submission_id INTEGER, award_type TEXT, score REAL, created_at TEXT DEFAULT CURRENT_TIMESTAMP)");
+
+            // ---- Lightweight schema migrations (safe for existing seminar.db) ----
+            migrateSchemaIfNeeded(conn);
+            System.out.println("DB init: schema ready.");
 
             // seed accounts for starters
             seedIfMissing(conn, "STU001", "Student One", "student1", "STUDENT");
@@ -48,6 +54,64 @@ public class DBHelper {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    private static void migrateSchemaIfNeeded(Connection conn) throws SQLException {
+        // submission.session_id
+        if (!columnExists(conn, "submission", "session_id")) {
+            try (Statement st = conn.createStatement()) {
+                st.execute("ALTER TABLE submission ADD COLUMN session_id INTEGER");
+            }
+            System.out.println("DB init: migrated submission.session_id");
+        }
+
+        // award.session_id + award.submission_id
+        if (!columnExists(conn, "award", "session_id")) {
+            try (Statement st = conn.createStatement()) {
+                st.execute("ALTER TABLE award ADD COLUMN session_id INTEGER");
+            }
+            System.out.println("DB init: migrated award.session_id");
+        }
+        if (!columnExists(conn, "award", "submission_id")) {
+            try (Statement st = conn.createStatement()) {
+                st.execute("ALTER TABLE award ADD COLUMN submission_id INTEGER");
+            }
+            System.out.println("DB init: migrated award.submission_id");
+        }
+
+        // Helpful indexes (idempotent)
+        try (Statement st = conn.createStatement()) {
+            st.execute("CREATE INDEX IF NOT EXISTS idx_submission_student_session ON submission(student_id, session_id, submission_id)");
+            st.execute("CREATE INDEX IF NOT EXISTS idx_award_session_student ON award(session_id, student_id)");
+            st.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_award_unique_per_session_type ON award(session_id, award_type)");
+        }
+
+        // Best-effort backfill for old rows (keeps app usable with existing seminar.db)
+        try (PreparedStatement ps = conn.prepareStatement(
+            "UPDATE submission " +
+            "SET session_id = (" +
+            "  SELECT sp.session_id FROM session_presenter sp " +
+            "  WHERE sp.student_id = submission.student_id " +
+            "  ORDER BY sp.session_id DESC LIMIT 1" +
+            ") " +
+            "WHERE session_id IS NULL"
+        )) {
+            ps.executeUpdate();
+        }
+    }
+
+    private static boolean columnExists(Connection conn, String tableName, String columnName) throws SQLException {
+        String sql = "PRAGMA table_info(" + tableName + ")";
+        try (PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                String name = rs.getString("name");
+                if (columnName.equalsIgnoreCase(name)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
     
     private static void seedSampleSession(Connection conn) throws SQLException {
@@ -194,23 +258,49 @@ public class DBHelper {
             
             // Save submission with material file path
             try (PreparedStatement ps = conn.prepareStatement(
-                "INSERT INTO submission(student_id, filepath, status) VALUES(?, ?, 'Submitted')")) {
+                "INSERT INTO submission(student_id, session_id, filepath, status) VALUES(?, ?, ?, 'Submitted')")) {
                 ps.setString(1, studentId);
-                ps.setString(2, materialPath);
+                ps.setInt(2, sessionId);
+                ps.setString(3, materialPath);
                 ps.executeUpdate();
             }
+            System.out.println("Registration: submission saved (student=" + studentId + ", session=SEM" + String.format("%03d", sessionId) + ")");
         }
     }
     
     // Get student's registered seminar
     public static Session getStudentRegisteredSeminar(String studentId) {
+        if (studentId == null || studentId.trim().isEmpty()) {
+            return null;
+        }
         try (Connection conn = getConnection()) {
-            // Get session_id from session_presenter
+            // Prefer the session from the latest submission (supports multi-session history)
             String sql = "SELECT s.session_id, s.session_date, s.venue, s.session_type " +
-                        "FROM session s " +
-                        "INNER JOIN session_presenter sp ON s.session_id = sp.session_id " +
-                        "WHERE sp.student_id = ?";
+                         "FROM session s " +
+                         "INNER JOIN submission sub ON sub.session_id = s.session_id " +
+                         "WHERE sub.student_id = ? AND sub.session_id IS NOT NULL " +
+                         "ORDER BY sub.submission_id DESC LIMIT 1";
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setString(1, studentId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        int sessionId = rs.getInt("session_id");
+                        String date = rs.getString("session_date");
+                        String venue = rs.getString("venue");
+                        String type = rs.getString("session_type");
+                        String sessionIdStr = String.format("SEM%03d", sessionId);
+                        return new Session(sessionIdStr, date, venue, type);
+                    }
+                }
+            }
+
+            // Fallback: older DB rows without session_id
+            String fallbackSql = "SELECT s.session_id, s.session_date, s.venue, s.session_type " +
+                                 "FROM session s " +
+                                 "INNER JOIN session_presenter sp ON s.session_id = sp.session_id " +
+                                 "WHERE sp.student_id = ? " +
+                                 "ORDER BY sp.session_id DESC LIMIT 1";
+            try (PreparedStatement ps = conn.prepareStatement(fallbackSql)) {
                 ps.setString(1, studentId);
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
@@ -235,6 +325,24 @@ public class DBHelper {
             String sql = "SELECT status FROM submission WHERE student_id = ? ORDER BY submission_id DESC LIMIT 1";
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setString(1, studentId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getString("status");
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static String getStudentSubmissionStatus(String studentId, int sessionId) {
+        try (Connection conn = getConnection()) {
+            String sql = "SELECT status FROM submission WHERE student_id = ? AND session_id = ? ORDER BY submission_id DESC LIMIT 1";
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setString(1, studentId);
+                ps.setInt(2, sessionId);
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
                         return rs.getString("status");
@@ -274,9 +382,6 @@ public class DBHelper {
         if (getSubmissionId(studentId) == null) {
             return null;
         }
-        if (isStudentEvaluatedByAny(studentId)) {
-            return "Completed";
-        }
         if (hasEvaluatorAssigned(studentId)) {
             return "Under evaluation";
         }
@@ -285,21 +390,61 @@ public class DBHelper {
     
     // Get student's award result
     public static String getStudentAwardResult(String studentId) {
+        if (studentId == null || studentId.trim().isEmpty()) {
+            return "Pending";
+        }
+        String status = getStudentSubmissionStatus(studentId);
+        Integer sessionId = getLatestSubmissionSessionId(studentId);
+        if (sessionId == null) {
+            return "Pending";
+        }
+        // Only publish award after coordinator finalises (submission status becomes Completed)
+        if (!"Completed".equalsIgnoreCase(status)) {
+            return "Pending";
+        }
         try (Connection conn = getConnection()) {
-            String sql = "SELECT award_type FROM award WHERE student_id = ? ORDER BY award_id DESC LIMIT 1";
+            String sql = "SELECT award_type FROM award WHERE student_id = ? AND session_id = ? ORDER BY award_id DESC LIMIT 1";
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setString(1, studentId);
+                ps.setInt(2, sessionId);
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
                         String awardType = rs.getString("award_type");
-                        return awardType != null ? awardType : "Pending";
+                        return awardType != null ? awardType : "No award";
                     }
                 }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return "Pending";
+        return "No award";
+    }
+
+    // Award status for a specific session (Pending until report is finalised)
+    public static String getStudentAwardResult(String studentId, int sessionId) {
+        if (studentId == null || studentId.trim().isEmpty()) {
+            return "Pending";
+        }
+        String status = getStudentSubmissionStatus(studentId, sessionId);
+        if (!"Completed".equalsIgnoreCase(status)) {
+            return "Pending";
+        }
+        try (Connection conn = getConnection()) {
+            String sql = "SELECT award_type FROM award WHERE student_id = ? AND session_id = ? ORDER BY award_id DESC LIMIT 1";
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setString(1, studentId);
+                ps.setInt(2, sessionId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        String awardType = rs.getString("award_type");
+                        return awardType != null ? awardType : "No award";
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return "No award";
     }
 
     // Create a new session with only date and venue, returns generated session_id or -1 on failure
@@ -683,6 +828,59 @@ public class DBHelper {
         return null;
     }
 
+    // Get latest submission ID for a student within a session
+    public static Integer getSubmissionId(String studentId, int sessionId) {
+        String sql = "SELECT submission_id FROM submission WHERE student_id = ? AND session_id = ? ORDER BY submission_id DESC LIMIT 1";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, studentId);
+            ps.setInt(2, sessionId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("submission_id");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // Get latest session_id for a student's latest submission
+    public static Integer getLatestSubmissionSessionId(String studentId) {
+        String sql = "SELECT session_id FROM submission WHERE student_id = ? ORDER BY submission_id DESC LIMIT 1";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, studentId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    int v = rs.getInt("session_id");
+                    return rs.wasNull() ? null : v;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // Latest active (not finalised) submission for a student
+    public static Integer getActiveSubmissionId(String studentId) {
+        String sql = "SELECT submission_id FROM submission WHERE student_id = ? AND coalesce(status,'') != 'Completed' ORDER BY submission_id DESC LIMIT 1";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, studentId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("submission_id");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     // Get appointment time for a student
     public static String getAppointmentTime(String studentId) {
         String sql = "SELECT time FROM appointments WHERE student_id = ? LIMIT 1";
@@ -740,6 +938,46 @@ public class DBHelper {
         }
     }
 
+    // Save evaluation for a specific session (prevents mixing history across sessions)
+    public static boolean saveEvaluation(String studentId, int sessionId, String evaluatorId, int clarity,
+                                         int methodology, int results, int presentation, String comments) {
+        Integer submissionId = getSubmissionId(studentId, sessionId);
+        if (submissionId == null) {
+            System.err.println("No submission found for student=" + studentId + " in session=SEM" + String.format("%03d", sessionId));
+            return false;
+        }
+
+        String sql = "INSERT INTO evaluation(submission_id, evaluator_id, clarity_score, " +
+                     "methodology_score, results_score, presentation_score, comments) " +
+                     "VALUES(?, ?, ?, ?, ?, ?, ?)";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, submissionId);
+            ps.setString(2, evaluatorId);
+            ps.setInt(3, clarity);
+            ps.setInt(4, methodology);
+            ps.setInt(5, results);
+            ps.setInt(6, presentation);
+            ps.setString(7, comments);
+            int affected = ps.executeUpdate();
+
+            if (affected > 0) {
+                System.out.println("Evaluation: saved (student=" + studentId + ", session=SEM" + String.format("%03d", sessionId) + ", evaluator=" + evaluatorId + ")");
+                try {
+                    String existingTime = getAppointmentTime(studentId);
+                    updateAppointment(studentId, evaluatorId, existingTime, "Evaluated");
+                } catch (SQLException e) {
+                    System.err.println("Failed to update appointment status: " + e.getMessage());
+                }
+            }
+
+            return affected > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     // Check if evaluator has evaluated this student
     public static boolean isStudentEvaluated(String studentId, String evaluatorId) {
         Integer submissionId = getSubmissionId(studentId);
@@ -759,6 +997,14 @@ public class DBHelper {
             e.printStackTrace();
         }
         return false;
+    }
+
+    public static boolean isStudentEvaluated(String studentId, int sessionId, String evaluatorId) {
+        Integer submissionId = getSubmissionId(studentId, sessionId);
+        if (submissionId == null) {
+            return false;
+        }
+        return isSubmissionEvaluatedByEvaluator(submissionId, evaluatorId);
     }
 
     // Check if student has been evaluated by any evaluator
@@ -781,10 +1027,56 @@ public class DBHelper {
         return false;
     }
 
+    public static boolean isStudentEvaluatedByAny(String studentId, int sessionId) {
+        Integer submissionId = getSubmissionId(studentId, sessionId);
+        if (submissionId == null) {
+            return false;
+        }
+        return isSubmissionEvaluatedByAny(submissionId);
+    }
+
+    private static boolean isSubmissionEvaluatedByAny(int submissionId) {
+        String sql = "SELECT 1 FROM evaluation WHERE submission_id = ? LIMIT 1";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, submissionId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    private static boolean isSubmissionEvaluatedByEvaluator(int submissionId, String evaluatorId) {
+        String sql = "SELECT 1 FROM evaluation WHERE submission_id = ? AND evaluator_id = ? LIMIT 1";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, submissionId);
+            ps.setString(2, evaluatorId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     // Get all evaluations for a student
     public static List<EvaluationData> getAllEvaluationsForStudent(String studentId) {
-        List<EvaluationData> evaluations = new ArrayList<>();
         Integer submissionId = getSubmissionId(studentId);
+        return getAllEvaluationsForSubmission(submissionId);
+    }
+
+    public static List<EvaluationData> getAllEvaluationsForStudent(String studentId, int sessionId) {
+        Integer submissionId = getSubmissionId(studentId, sessionId);
+        return getAllEvaluationsForSubmission(submissionId);
+    }
+
+    private static List<EvaluationData> getAllEvaluationsForSubmission(Integer submissionId) {
+        List<EvaluationData> evaluations = new ArrayList<>();
         if (submissionId == null) {
             return evaluations;
         }
@@ -859,7 +1151,8 @@ public class DBHelper {
         }
 
         for (String studentId : studentIds) {
-            if (!isStudentEvaluatedByAny(studentId)) {
+            Integer submissionId = resolveSubmissionIdForSession(studentId, sessionId);
+            if (submissionId == null || !isSubmissionEvaluatedByAny(submissionId)) {
                 return false;
             }
         }
@@ -901,22 +1194,11 @@ public class DBHelper {
             return;
         }
 
-        // Clear existing awards for students in this session
-        try (Connection conn = getConnection()) {
-            if (!studentIds.isEmpty()) {
-                StringBuilder placeholders = new StringBuilder();
-                for (int i = 0; i < studentIds.size(); i++) {
-                    if (i > 0) placeholders.append(",");
-                    placeholders.append("?");
-                }
-                String deleteSql = "DELETE FROM award WHERE student_id IN (" + placeholders.toString() + ")";
-                try (PreparedStatement ps = conn.prepareStatement(deleteSql)) {
-                    for (int i = 0; i < studentIds.size(); i++) {
-                        ps.setString(i + 1, studentIds.get(i));
-                    }
-                    ps.executeUpdate();
-                }
-            }
+        // Clear existing awards for this session
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement("DELETE FROM award WHERE session_id = ?")) {
+            ps.setInt(1, sessionId);
+            ps.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
             return;
@@ -927,8 +1209,9 @@ public class DBHelper {
         for (String studentId : studentIds) {
             StudentProfileData profile = getStudentProfile(studentId);
             if (profile != null) {
-                double avgTotal = getAverageTotalScore(studentId);
-                double avgPresentation = getAveragePresentationScore(studentId);
+                Integer submissionId = resolveSubmissionIdForSession(studentId, sessionId);
+                double avgTotal = getAverageTotalScoreForSubmission(submissionId);
+                double avgPresentation = getAveragePresentationScoreForSubmission(submissionId);
                 studentScores.add(new StudentScoreData(studentId, profile.presentationType, avgTotal, avgPresentation));
             }
         }
@@ -937,7 +1220,12 @@ public class DBHelper {
         String bestOralId = null;
         double bestOralScore = -1;
         for (StudentScoreData data : studentScores) {
-            if ("Oral".equalsIgnoreCase(data.presentationType) && data.avgTotalScore > bestOralScore) {
+            if (!"Oral".equalsIgnoreCase(data.presentationType)) continue;
+            if (data.avgTotalScore > bestOralScore ||
+                (data.avgTotalScore == bestOralScore && bestOralId != null && data.studentId.compareTo(bestOralId) < 0)) {
+                bestOralScore = data.avgTotalScore;
+                bestOralId = data.studentId;
+            } else if (bestOralId == null && data.avgTotalScore >= 0) {
                 bestOralScore = data.avgTotalScore;
                 bestOralId = data.studentId;
             }
@@ -947,7 +1235,12 @@ public class DBHelper {
         String bestPosterId = null;
         double bestPosterScore = -1;
         for (StudentScoreData data : studentScores) {
-            if ("Poster".equalsIgnoreCase(data.presentationType) && data.avgTotalScore > bestPosterScore) {
+            if (!"Poster".equalsIgnoreCase(data.presentationType)) continue;
+            if (data.avgTotalScore > bestPosterScore ||
+                (data.avgTotalScore == bestPosterScore && bestPosterId != null && data.studentId.compareTo(bestPosterId) < 0)) {
+                bestPosterScore = data.avgTotalScore;
+                bestPosterId = data.studentId;
+            } else if (bestPosterId == null && data.avgTotalScore >= 0) {
                 bestPosterScore = data.avgTotalScore;
                 bestPosterId = data.studentId;
             }
@@ -957,7 +1250,11 @@ public class DBHelper {
         String peopleChoiceId = null;
         double peopleChoiceScore = -1;
         for (StudentScoreData data : studentScores) {
-            if (data.avgPresentationScore > peopleChoiceScore) {
+            if (data.avgPresentationScore > peopleChoiceScore ||
+                (data.avgPresentationScore == peopleChoiceScore && peopleChoiceId != null && data.studentId.compareTo(peopleChoiceId) < 0)) {
+                peopleChoiceScore = data.avgPresentationScore;
+                peopleChoiceId = data.studentId;
+            } else if (peopleChoiceId == null && data.avgPresentationScore >= 0) {
                 peopleChoiceScore = data.avgPresentationScore;
                 peopleChoiceId = data.studentId;
             }
@@ -965,52 +1262,127 @@ public class DBHelper {
 
         // Save awards
         try (Connection conn = getConnection()) {
-            String insertSql = "INSERT INTO award(student_id, award_type, score) VALUES(?, ?, ?)";
+            String insertSql = "INSERT INTO award(student_id, session_id, submission_id, award_type, score) VALUES(?, ?, ?, ?, ?)";
             try (PreparedStatement ps = conn.prepareStatement(insertSql)) {
                 if (bestOralId != null) {
                     ps.setString(1, bestOralId);
-                    ps.setString(2, "Best Oral");
-                    ps.setDouble(3, bestOralScore);
+                    ps.setInt(2, sessionId);
+                    ps.setObject(3, resolveSubmissionIdForSession(bestOralId, sessionId));
+                    ps.setString(4, "Best Oral");
+                    ps.setDouble(5, bestOralScore);
                     ps.executeUpdate();
                 }
 
                 if (bestPosterId != null) {
                     ps.setString(1, bestPosterId);
-                    ps.setString(2, "Best Poster");
-                    ps.setDouble(3, bestPosterScore);
+                    ps.setInt(2, sessionId);
+                    ps.setObject(3, resolveSubmissionIdForSession(bestPosterId, sessionId));
+                    ps.setString(4, "Best Poster");
+                    ps.setDouble(5, bestPosterScore);
                     ps.executeUpdate();
                 }
 
                 if (peopleChoiceId != null) {
                     ps.setString(1, peopleChoiceId);
-                    ps.setString(2, "People's Choice");
-                    ps.setDouble(3, peopleChoiceScore);
+                    ps.setInt(2, sessionId);
+                    ps.setObject(3, resolveSubmissionIdForSession(peopleChoiceId, sessionId));
+                    ps.setString(4, "People's Choice");
+                    ps.setDouble(5, peopleChoiceScore);
                     ps.executeUpdate();
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        System.out.println("Awards: computed for session=SEM" + String.format("%03d", sessionId));
+    }
+
+    private static double getAverageTotalScoreForSubmission(Integer submissionId) {
+        List<EvaluationData> evaluations = getAllEvaluationsForSubmission(submissionId);
+        if (evaluations.isEmpty()) return 0.0;
+        int total = 0;
+        for (EvaluationData e : evaluations) total += e.getTotalScore();
+        return (double) total / evaluations.size();
+    }
+
+    private static double getAveragePresentationScoreForSubmission(Integer submissionId) {
+        List<EvaluationData> evaluations = getAllEvaluationsForSubmission(submissionId);
+        if (evaluations.isEmpty()) return 0.0;
+        int total = 0;
+        for (EvaluationData e : evaluations) total += e.presentationScore;
+        return (double) total / evaluations.size();
+    }
+
+    // Coordinator action: publish awards + unlock results for a session
+    public static boolean finaliseSessionReport(int sessionId) {
+        System.out.println("FinaliseReport: session=SEM" + String.format("%03d", sessionId) + " started");
+        // Resolve + validate presenter submissions for this session
+        List<String> studentIds = getStudentsInSession(sessionId);
+        for (String studentId : studentIds) {
+            Integer submissionId = resolveSubmissionIdForSession(studentId, sessionId);
+            if (submissionId == null || !isSubmissionEvaluatedByAny(submissionId)) {
+                System.out.println("FinaliseReport: blocked (missing evaluation) session=SEM" +
+                    String.format("%03d", sessionId) + ", student=" + studentId);
+                return false;
+            }
+        }
+
+        calculateAndSaveAwards(sessionId);
+
+        // Mark only the resolved submissions as Completed, and normalize their session_id
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(
+                 "UPDATE submission SET status = 'Completed', session_id = ? WHERE submission_id = ?"
+             )) {
+            for (String studentId : studentIds) {
+                Integer submissionId = resolveSubmissionIdForSession(studentId, sessionId);
+                if (submissionId == null) continue;
+                ps.setInt(1, sessionId);
+                ps.setInt(2, submissionId);
+                ps.executeUpdate();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        System.out.println("FinaliseReport: session=SEM" + String.format("%03d", sessionId) + " completed (awards published, results unlocked)");
+        return true;
+    }
+
+    /**
+     * Resolve which submission should be treated as the presenter's submission for a given session.
+     * This handles legacy / inconsistent data where submission.session_id may not match appointments.session_id.
+     */
+    private static Integer resolveSubmissionIdForSession(String studentId, int sessionId) {
+        // First, try the proper session-scoped submission
+        Integer bySession = getSubmissionId(studentId, sessionId);
+        if (bySession != null) {
+            return bySession;
+        }
+
+        // Next, try the latest evaluated submission (likely the one the evaluator actually scored)
+        String evaluatedSql =
+            "SELECT s.submission_id " +
+            "FROM submission s " +
+            "WHERE s.student_id = ? AND EXISTS (" +
+            "  SELECT 1 FROM evaluation e WHERE e.submission_id = s.submission_id" +
+            ") " +
+            "ORDER BY s.submission_id DESC LIMIT 1";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(evaluatedSql)) {
+            ps.setString(1, studentId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("submission_id");
                 }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        // Update submission statuses to "Completed"
-        try (Connection conn = getConnection()) {
-            if (!studentIds.isEmpty()) {
-                StringBuilder placeholders = new StringBuilder();
-                for (int i = 0; i < studentIds.size(); i++) {
-                    if (i > 0) placeholders.append(",");
-                    placeholders.append("?");
-                }
-                String updateSql = "UPDATE submission SET status = 'Completed' WHERE student_id IN (" + placeholders.toString() + ")";
-                try (PreparedStatement ps = conn.prepareStatement(updateSql)) {
-                    for (int i = 0; i < studentIds.size(); i++) {
-                        ps.setString(i + 1, studentIds.get(i));
-                    }
-                    ps.executeUpdate();
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        // Fallback: latest submission (better than hard-failing)
+        return getSubmissionId(studentId);
     }
 
     // Inner class to hold student score data
@@ -1077,7 +1449,48 @@ public class DBHelper {
 
         String combinedComments = String.join("\n\n", commentsList);
         String award = getStudentAwardResult(studentId);
-        if ("Pending".equals(award)) {
+        if (award == null || award.trim().isEmpty()) {
+            award = "No award";
+        }
+
+        return new StudentEvaluationResults(
+            (int) Math.round(avgClarity),
+            (int) Math.round(avgMethodology),
+            (int) Math.round(avgResults),
+            (int) Math.round(avgPresentation),
+            combinedComments,
+            award
+        );
+    }
+
+    public static StudentEvaluationResults getStudentEvaluationResults(String studentId, int sessionId) {
+        List<EvaluationData> evaluations = getAllEvaluationsForStudent(studentId, sessionId);
+        if (evaluations.isEmpty()) {
+            return null;
+        }
+
+        double avgClarity = 0, avgMethodology = 0, avgResults = 0, avgPresentation = 0;
+        List<String> commentsList = new ArrayList<>();
+
+        for (EvaluationData eval : evaluations) {
+            avgClarity += eval.clarityScore;
+            avgMethodology += eval.methodologyScore;
+            avgResults += eval.resultsScore;
+            avgPresentation += eval.presentationScore;
+            if (eval.comments != null && !eval.comments.trim().isEmpty()) {
+                commentsList.add(eval.comments.trim());
+            }
+        }
+
+        int count = evaluations.size();
+        avgClarity /= count;
+        avgMethodology /= count;
+        avgResults /= count;
+        avgPresentation /= count;
+
+        String combinedComments = String.join("\n\n", commentsList);
+        String award = getStudentAwardResult(studentId, sessionId);
+        if (award == null || award.trim().isEmpty()) {
             award = "No award";
         }
 
@@ -1094,6 +1507,35 @@ public class DBHelper {
     // Get latest evaluation for a student (latest submission)
     public static Evaluation getEvaluationByStudentId(String studentId) {
         Integer submissionId = getSubmissionId(studentId);
+        if (submissionId == null) {
+            return null;
+        }
+
+        String sql = "SELECT clarity_score, methodology_score, results_score, presentation_score, comments " +
+                     "FROM evaluation WHERE submission_id = ? ORDER BY evaluation_id DESC LIMIT 1";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, submissionId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return new Evaluation(
+                        rs.getInt("clarity_score"),
+                        rs.getInt("methodology_score"),
+                        rs.getInt("results_score"),
+                        rs.getInt("presentation_score"),
+                        rs.getString("comments")
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // Get latest evaluation for a student in a specific session
+    public static Evaluation getEvaluationByStudentId(String studentId, int sessionId) {
+        Integer submissionId = getSubmissionId(studentId, sessionId);
         if (submissionId == null) {
             return null;
         }

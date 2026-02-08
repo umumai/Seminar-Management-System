@@ -22,6 +22,8 @@ public class StudentPanel {
     
     // State management (penting: tracks student's data)
     private Session registeredSeminar = null;
+    // True when the student has a current (not finalised) seminar/submission
+    private boolean hasActiveRegistration = false;
     // (TEMPORARY) Selected seminar (student currently registering but doesn't submit yet)
     private Session selectedSeminarTemp = null; 
     private String submissionStatus = null; // "Submitted", "Under Evaluation", "Completed"
@@ -155,9 +157,9 @@ public class StudentPanel {
         registerPanel.setName("Register");
         registerPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         
-        // Check if student already registered
-        if (registeredSeminar != null) {
-            JLabel message = new JLabel("You have already registered for a seminar.", SwingConstants.CENTER);
+        // Block new registration only while the current seminar is not finalised
+        if (hasActiveRegistration) {
+            JLabel message = new JLabel("You are currently registered for a seminar. Please wait for the report to be finalised.", SwingConstants.CENTER);
             message.setFont(new Font("SansSerif", Font.PLAIN, 14));
             registerPanel.add(message, BorderLayout.CENTER);
             return registerPanel;
@@ -684,6 +686,7 @@ public class StudentPanel {
             registeredSeminar = selectedSeminarTemp;
             selectedSeminarTemp = null; // Clear temporary selection after successful submission
             submissionStatus = "Submitted";
+            hasActiveRegistration = true;
             
             // Show success message
             JOptionPane.showMessageDialog(
@@ -776,9 +779,10 @@ public class StudentPanel {
         try {
             // Load registered seminar
             Session seminar = DBHelper.getStudentRegisteredSeminar(studentId);
-            if (seminar != null) {
-                registeredSeminar = seminar;
-            }
+            registeredSeminar = seminar;
+
+            // Active registration is true until coordinator finalises (submission.status becomes Completed)
+            hasActiveRegistration = DBHelper.getActiveSubmissionId(studentId) != null;
             
             // Load display status for label: Submitted | Under evaluation | Completed
             String displayStatus = DBHelper.getStudentDisplayStatus(studentId);
@@ -791,6 +795,8 @@ public class StudentPanel {
             if (award != null) {
                 awardResult = award;
             }
+
+            System.out.println("StudentStatus: loaded (student=" + studentId + ", activeRegistration=" + hasActiveRegistration + ", status=" + submissionStatus + ")");
         } catch (Exception e) {
             e.printStackTrace();
         }

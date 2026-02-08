@@ -181,6 +181,13 @@ public class LoginFrame extends JFrame {
         cardLayout.show(mainPanel, "reportPanel");
     }
 
+    public void showReportPanel(String studentId, int sessionId) {
+        if (reportPanelInstance != null) {
+            reportPanelInstance.setCurrentStud(studentId, sessionId);
+        }
+        cardLayout.show(mainPanel, "reportPanel");
+    }
+
     public void showEvaluationPanel(String studentId) {
         if (evaluationPanelInstance != null) {
             evaluationPanelInstance.setCurrentStud(studentId);
