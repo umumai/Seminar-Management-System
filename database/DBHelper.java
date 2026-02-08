@@ -1562,5 +1562,29 @@ public class DBHelper {
         return null;
     }
 
+     // Get latest appointment for a student
+    public static Appointment getAppointmentByStudentId(String studentId) {
+        String sql = "SELECT session_id, student_id, evaluator_id, time, status " +
+                     "FROM appointments WHERE student_id = ? ORDER BY appointment_id DESC LIMIT 1";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, studentId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return new Appointment(
+                        rs.getInt("session_id"),
+                        rs.getString("student_id"),
+                        rs.getString("evaluator_id"),
+                        rs.getString("time"),
+                        rs.getString("status")
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     
 }

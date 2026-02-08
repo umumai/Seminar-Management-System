@@ -107,36 +107,17 @@ public class ReportFrame extends JPanel {
         add(topPanel,BorderLayout.NORTH);
     }
 
-    public void setCurrentStud(String studentId) {
-        String ID = studentId == null ? "" : studentId;
-        currentStud = DBHelper.getUserbyID(ID);
-        scores = DBHelper.getEvaluationByStudentId(ID);
-        appt = DBHelper.getAppointmentByStudentId(ID);
-        reportLabel.setText("Student " + currentStud.getId() + " report");
-        studentNameLabel.setText(currentStud.getName());
-        evaluatorNameLabel.setText(DBHelper.getNameByID(appt.getEvaluatorID()));
-        studentIDLabel.setText(ID);
-
-        clarityLabel.setText(String.valueOf(scores.getClarityScore()));
-        methodologyLabel.setText(String.valueOf(scores.getMethodologyScore()));
-        resultsLabel.setText(String.valueOf(scores.getResultsScore()));
-        presentationLabel.setText(String.valueOf(scores.getPresentationScore()));
-
-        commentsArea.setText(scores.getComments());
-        awardLabel.setText("Award: " + DBHelper.getStudentAwardResult(ID));
-        Session s = DBHelper.getStudentRegisteredSeminar(ID);
-        sessionLabel.setText(s != null ? s.getSessionID() : "-");
-        revalidate();
-        repaint();
-    }
-
     public void setCurrentStud(String studentId, int sessionId) {
         String ID = studentId == null ? "" : studentId;
         currentStud = DBHelper.getUserbyID(ID);
         scores = DBHelper.getEvaluationByStudentId(ID, sessionId);
+        appt = DBHelper.getAppointmentByStudentId(ID);
 
         reportLabel.setText("Student " + ID + " report");
         studentNameLabel.setText(currentStud != null ? currentStud.getName() : "-");
+        studentNameLabel.setText(currentStud.getName());
+        evaluatorNameLabel.setText(DBHelper.getNameByID(appt.getEvaluatorID()));
+        studentIDLabel.setText(ID);
 
         Session s = DBHelper.getSession(sessionId);
         sessionLabel.setText(s != null ? s.getSessionID() : ("SEM" + String.format("%03d", sessionId)));
