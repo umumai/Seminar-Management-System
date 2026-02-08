@@ -31,7 +31,6 @@ public class EditSchedule extends JPanel{
         JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.LEFT);
         //configure how many session exist
         int sessionList = DBHelper.getSessionCount();
-        // System.err.println("DEBUG : Total session exist in edit schedule = " + sessionList);
         for (int i = 1; i <= sessionList; i++) {
             JPanel mainPanel = new JPanel(new BorderLayout());
             // Create Appointment objects for each appointment_id in the database

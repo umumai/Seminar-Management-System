@@ -301,7 +301,7 @@ public class EvaluatorFrame extends JPanel {
         //==========bottom panel
         JPanel bottomPanel = new JPanel(new BorderLayout());
         bottomPanel.setBorder(BorderFactory.createEmptyBorder(10,15,5,5));
-        JLabel instruction = new JLabel("Displaying sessions with appointments assigned to you.");
+        JLabel instruction = new JLabel("Click name of students assigned to you to give evaluation.");
         instruction.setForeground(Color.gray);
         bottomPanel.add(instruction,BorderLayout.WEST);
 

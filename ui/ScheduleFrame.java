@@ -40,8 +40,6 @@ public class ScheduleFrame extends JPanel {
             if (selectedChoice.equals(choice)) {
                 System.out.println(choice + " selected");
                 btn.setText(choice);
-                //result = choice [choice = "Fatimah"]
-                // openRoleScreen(role); // call function dynamically
                 break;
             }
         }
@@ -50,9 +48,6 @@ public class ScheduleFrame extends JPanel {
 
     public ScheduleFrame(JFrame frame) {
         this.frame = frame;
-        // super("Postgraduate Academic Research Seminar");
-        // setSize(600, 400);
-        // setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
         //main panel
@@ -111,10 +106,9 @@ public class ScheduleFrame extends JPanel {
         createButton("", Color.white, Color.black, tablePanel);
         createButton("", Color.white, Color.black, tablePanel);
 
-        //bottom panel - might delete later kalau xguna lgsung
+        //bottom panel 
         JPanel bottomPanel = new JPanel(new BorderLayout());
-        bottomPanel.setBorder(BorderFactory.createEmptyBorder(0, 20, 10, 20));
-        // bottomPanel.add(createButtonSave("save", Color.green, Color.white, bottomPanel),BorderLayout.EAST);        
+        bottomPanel.setBorder(BorderFactory.createEmptyBorder(0, 20, 10, 20));       
      
         //add other panels to main Panel
         mainPanel.add(topPanel, BorderLayout.NORTH);
@@ -156,7 +150,4 @@ public class ScheduleFrame extends JPanel {
         return btn;
     }
 
-    // public static void main(String[] args) {
-    //     new ScheduleFrame();
-    // }
 }

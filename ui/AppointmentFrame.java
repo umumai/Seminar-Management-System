@@ -64,21 +64,12 @@ public class AppointmentFrame extends JPanel {
 
         //check how many session exist
         int sessionList = DBHelper.getSessionCount();
-        System.err.println("DEBUG : Total session exist in appointment management = " + sessionList);
         for (int i = 1; i <= sessionList; i++) {
             final int sessionId = i; // umu added sessionId to pass to other functions
             JPanel mainPanel = new JPanel(new BorderLayout());
             // Create Appointment objects for each appointment_id in the database
             apptList = DBHelper.getAppointmentsbySession(i);
             List<Appointment> sessionAppointments = apptList;
-            //DEBUG
-            // System.err.println("DEBUG : Total appointments exist in session " + i + " = " + apptList.size());
-            // for (Appointment appointment : apptList) {
-            //     System.err.println("DEBUG : Appointment - SessionID: " + appointment.getSessionID() + 
-            //     ", StudentID: " + appointment.getStudentID() + 
-            //     ", EvaluatorID: " + appointment.getEvaluatorID() + 
-            //     ", TimeSlot: " + appointment.getTimeSlot());
-            // }
             //adjust the tab name here
             String tabsName = "Session " + i;
 
@@ -636,14 +627,11 @@ public class AppointmentFrame extends JPanel {
 
     ArrayList<String> bookedTime = new ArrayList<>();
     for (Appointment apt : sessionAppointments) {
-        System.out.println("DEBUG : " + apt.getTimeSlot()  + ":00 is taken by " + DBHelper.getNameByID(apt.getStudentID()));
         if (apt != null && apt.getTimeSlot() != null && !"0".equals(apt.getTimeSlot())) {
             bookedTime.add(apt.getTimeSlot());
-            // System.out.println("DEBUG : ");
         }
     }
 
-    System.out.println("DEBUG changeTime: availTime initial 9-17, bookedTimes=" + bookedTime + ", availTimeRemaining=" + availTime);
     availTime.removeIf(bookedTime::contains);
     
     // Convert ArrayList to array
