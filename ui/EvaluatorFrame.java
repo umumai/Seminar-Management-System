@@ -141,7 +141,8 @@ public class EvaluatorFrame extends JPanel {
                 String studentId = appt.getStudentID();
                 boolean isAssignedToMe = appt.getEvaluatorID() == null ? 
                     currentUser.getId() == null : appt.getEvaluatorID().equals(currentUser.getId());
-                boolean isEvaluated = isAssignedToMe && currentUser != null && 
+                // Green highlight should represent THIS evaluator's evaluated work (not other evaluators').
+                boolean isEvaluated = isAssignedToMe && currentUser != null &&
                     DBHelper.isStudentEvaluated(studentId, currentUser.getId());
                 
                 switch (time) {
@@ -359,7 +360,14 @@ public class EvaluatorFrame extends JPanel {
         buildUI();
     }
 
-    private void showEvaluationPanel(String studentId) {
+    private void showEvaluationPanel(String studentId) { 
+        // umu prevent evaluator from evaluating the same student again
+        if (studentId != null && DBHelper.isStudentEvaluatedByAny(studentId)) {
+            JOptionPane.showMessageDialog(this, "This Application has been evaluated");
+            System.out.println(studentId + " application has been evaluated.");
+            return;
+        }
+
         if (evaluationFrameInstance != null) {
             evaluationFrameInstance.setEvaluator(currentUser);
             evaluationFrameInstance.setCurrentStud(studentId);

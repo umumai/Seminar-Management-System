@@ -90,12 +90,16 @@ public class EvaluationFrame extends JPanel {
         // Research Title
         JLabel titleLabel = new JLabel("Research Title:");
         titleLabel.setFont(new Font("SansSerif", Font.BOLD, 12));
+        titleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         researchTitleLabel = new JLabel("(RESEARCH TITLE)");
         researchTitleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
+        researchTitleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        researchTitleLabel.setHorizontalAlignment(SwingConstants.LEFT);
         
         // Abstract
         JLabel abstractLabel = new JLabel("Abstract:");
         abstractLabel.setFont(new Font("SansSerif", Font.BOLD, 12));
+        abstractLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         abstractArea = new JTextArea(5, 30);
         abstractArea.setEditable(false);
         abstractArea.setLineWrap(true);
@@ -104,33 +108,44 @@ public class EvaluationFrame extends JPanel {
         abstractArea.setBackground(Color.WHITE);
         JScrollPane abstractScroll = new JScrollPane(abstractArea);
         abstractScroll.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+        abstractScroll.setAlignmentX(Component.LEFT_ALIGNMENT);
         
         // Supervisor Name
         JLabel supervisorTitleLabel = new JLabel("Supervisor Name:");
         supervisorTitleLabel.setFont(new Font("SansSerif", Font.BOLD, 12));
+        supervisorTitleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         supervisorLabel = new JLabel("(SUPERVISOR NAME)");
         supervisorLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
+        supervisorLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        supervisorLabel.setHorizontalAlignment(SwingConstants.LEFT);
         
         // Presentation Type
         JLabel typeTitleLabel = new JLabel("Presentation Type:");
         typeTitleLabel.setFont(new Font("SansSerif", Font.BOLD, 12));
+        typeTitleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         presentationTypeLabel = new JLabel("(PRESENTATION TYPE)");
         presentationTypeLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
+        presentationTypeLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        presentationTypeLabel.setHorizontalAlignment(SwingConstants.LEFT);
         
         // Presentation Material
         JLabel materialTitleLabel = new JLabel("Presentation Material:");
         materialTitleLabel.setFont(new Font("SansSerif", Font.BOLD, 12));
+        materialTitleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         JPanel materialPanel = new JPanel(new BorderLayout());
+        materialPanel.setBackground(Color.WHITE);
         materialLabel = new JLabel("presentationfile.pdf");
         materialLabel.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(Color.RED, 1),
             BorderFactory.createEmptyBorder(5, 5, 5, 5)
         ));
+        materialLabel.setHorizontalAlignment(SwingConstants.LEFT);
         downloadButton = new JButton("Download Material");
         downloadButton.addActionListener(e -> downloadMaterial());
         materialPanel.add(materialLabel, BorderLayout.CENTER);
         materialPanel.add(downloadButton, BorderLayout.EAST);
         materialPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
+        materialPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
         
         contentPanel.add(titleLabel);
         contentPanel.add(researchTitleLabel);
@@ -248,8 +263,8 @@ public class EvaluationFrame extends JPanel {
         File file = new File(profile.filepath);
         if (file.exists()) {
             try {
-                Desktop.getDesktop().open(file.getParentFile());
-                JOptionPane.showMessageDialog(this, "Opening file location: " + file.getAbsolutePath());
+                Desktop.getDesktop().open(file);
+                JOptionPane.showMessageDialog(this, "Opening file: " + file.getAbsolutePath());
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(this, "Unable to open file: " + e.getMessage());
             }
@@ -261,6 +276,12 @@ public class EvaluationFrame extends JPanel {
     private void submitEvaluation() {
         if (currentStudentId == null || currentEvaluator == null) {
             JOptionPane.showMessageDialog(this, "Missing student or evaluator information.");
+            return;
+        }
+        // Display for double evaluation
+        if (DBHelper.isStudentEvaluatedByAny(currentStudentId)) {
+            JOptionPane.showMessageDialog(this, "This Application has been evaluated");
+            System.out.println(currentStudentId + " application has been evaluated.");
             return;
         }
         

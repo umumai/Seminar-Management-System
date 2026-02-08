@@ -309,9 +309,11 @@ public class StudentPanel {
         statusCard.add(statusLabel);
         statusCard.add(Box.createVerticalStrut(10));
         
-        // Show marks, comments, award only after coordinator has finalised (submission.status = Completed)
-        boolean isFinalised = currentUser != null && "Completed".equals(DBHelper.getStudentSubmissionStatus(currentUser.getId()));
-        if (isFinalised) {
+        // Only show evaluation results after coordinator has finalised (raw submission status == "Completed")
+        boolean isCoordinatorFinalised = currentUser != null &&
+            "Completed".equals(DBHelper.getStudentSubmissionStatus(currentUser.getId()));
+
+        if (isCoordinatorFinalised) {
             DBHelper.StudentEvaluationResults results = DBHelper.getStudentEvaluationResults(currentUser.getId());
             if (results != null) {
                 // Evaluation Results Section

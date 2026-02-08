@@ -37,7 +37,7 @@ public class DBHelper {
             // award table (award_id, student_id, award_type, created_at)
             st.execute("CREATE TABLE IF NOT EXISTS award(award_id INTEGER PRIMARY KEY AUTOINCREMENT, student_id TEXT, award_type TEXT, score REAL, created_at TEXT DEFAULT CURRENT_TIMESTAMP)");
 
-            // Seed accounts if not present
+            // seed accounts for starters
             seedIfMissing(conn, "STU001", "Student One", "student1", "STUDENT");
             seedIfMissing(conn, "EVA001", "Evaluator One", "eval1", "EVALUATOR");
             seedIfMissing(conn, "COO001", "Coordinator One", "coord1", "COORDINATOR");
@@ -483,11 +483,12 @@ public class DBHelper {
 
     // Get student_id from appointments table by sessionId and row number
     public static String getStudentIdFromAppointment(int sessionId, int rowNumber) {
+        int offset = rowNumber - 1;
         String sql = "SELECT student_id FROM appointments WHERE session_id = ? LIMIT 1 OFFSET ?";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, sessionId);
-            ps.setInt(2, rowNumber - 1);  // Start from 0
+            ps.setInt(2, offset);  // Start from 0
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return rs.getString("student_id");
@@ -1091,5 +1092,4 @@ public class DBHelper {
     }
 
     
-} 
-
+}
