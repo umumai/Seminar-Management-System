@@ -265,3 +265,1201 @@ public class DBHelper {
     }
 } 
 
+<<<<<<< Updated upstream
+=======
+    // Award status for a specific session (Pending until report is finalised)
+    public static String getStudentAwardResult(String studentId, int sessionId) {
+        if (studentId == null || studentId.trim().isEmpty()) {
+            return "Pending";
+        }
+        String status = getStudentSubmissionStatus(studentId, sessionId);
+        if (!"Completed".equalsIgnoreCase(status)) {
+            return "Pending";
+        }
+        try (Connection conn = getConnection()) {
+            String sql = "SELECT award_type FROM award WHERE student_id = ? AND session_id = ? ORDER BY award_id DESC LIMIT 1";
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setString(1, studentId);
+                ps.setInt(2, sessionId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        String awardType = rs.getString("award_type");
+                        return awardType != null ? awardType : "No award";
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return "No award";
+    }
+
+    // Create a new session with only date and venue, returns generated session_id or -1 on failure
+    public static int createSession(String sessionDate, String venue) throws SQLException {
+        String sql = "INSERT INTO session(session_date, venue) VALUES(?, ?)";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setString(1, sessionDate);
+            ps.setString(2, venue);
+            int affected = ps.executeUpdate();
+            if (affected == 0) return -1;
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        }
+        return -1;
+    }
+
+    // Check whether a session with the given session_id exists
+    public static boolean sessionExists(int sessionId) {
+        String sql = "SELECT 1 FROM session WHERE session_id = ? LIMIT 1";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, sessionId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    // Return the total number of sessions in the database
+    public static int getSessionCount() {
+        String sql = "SELECT COUNT(*) FROM session";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+    
+    // Get session data by session_id (row number)
+    public static Session getSession(int sessionId) {
+        String sql = "SELECT session_id, session_date, venue, session_type FROM session WHERE session_id = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, sessionId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    String date = rs.getString("session_date");
+                    String venue = rs.getString("venue");
+                    String type = rs.getString("session_type");
+                    String sessionIdStr = String.format("SEM%03d", sessionId);
+                    return new Session(sessionIdStr, date, venue, type);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // Insert student_id into student_profile table
+    public static boolean insertStudentProfile(String studentId) throws SQLException {
+        String sql = "INSERT INTO student_profile(student_id) VALUES(?)";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, studentId);
+            int affected = ps.executeUpdate();
+            return affected > 0;
+        }
+    }
+
+    // Insert student_id and session_id into session_presenter table
+    public static boolean insertSessionPresenter(int sessionId) throws SQLException {
+        String sql = "INSERT INTO session_presenter(session_id) VALUES(?)";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, sessionId);
+            int affected = ps.executeUpdate();
+            return affected > 0;
+        }
+    }
+
+    // Get student name from users table by student_id
+    public static String getStudentNameById(String studentId) {
+        String sql = "SELECT name FROM users WHERE id = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, studentId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("name");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // Insert session_id and student_id into appointments table 
+    public static boolean insertAppointment(int sessionId, String studentId) throws SQLException {
+        String sql = "INSERT INTO appointments(session_id, student_id, time, status) VALUES(?, ?, ?, ?)";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, sessionId);
+            ps.setString(2, studentId);
+            ps.setString(3, "0");
+            ps.setString(4, "Unassigned"); // umu added status "Unassigned" to show in Appointment Management
+            int affected = ps.executeUpdate();
+            return affected > 0;
+        }
+    }
+
+    //  Get all appointments from database
+    public static List<Appointment> getAllAppointments() {
+        String sql = "SELECT session_id, student_id, evaluator_id, time, status FROM appointments";
+        List<Appointment> appointments = new ArrayList<>();
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    int sessionId = rs.getInt("session_id");
+                    String studentId = rs.getString("student_id");
+                    String evaluatorId = rs.getString("evaluator_id");
+                    String timeSlot = rs.getString("time");
+                    String status = rs.getString("status");
+                    appointments.add(new Appointment(sessionId, studentId, evaluatorId, timeSlot, status));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return appointments;
+    }
+
+     // Get all appointments from database
+    public static List<Appointment> getAppointmentsbySession(int sessionID) {
+        String sql = "SELECT student_id, evaluator_id, time, status FROM appointments WHERE session_id = ?";
+        List<Appointment> appointments = new ArrayList<>();
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, sessionID);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    String studentId = rs.getString("student_id");
+                    String evaluatorId = rs.getString("evaluator_id");
+                    String timeSlot = rs.getString("time");
+                    String status = rs.getString("status");
+
+                    // Normalize for coordinator display: only Unassigned / Under Evaluation / Evaluated.
+                    boolean evaluatorAssigned = evaluatorId != null && !evaluatorId.trim().isEmpty();
+                    boolean timeAssigned = timeSlot != null && !timeSlot.trim().isEmpty() && !"0".equals(timeSlot);
+                    boolean isEvaluated = status != null && "evaluated".equalsIgnoreCase(status);
+
+                    if (isEvaluated) {
+                        status = "Evaluated";
+                    } else if (evaluatorAssigned && timeAssigned) {
+                        status = "Under Evaluation";
+                    } else {
+                        status = "Unassigned";
+                    }
+                    appointments.add(new Appointment(sessionID, studentId, evaluatorId, timeSlot, status));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return appointments;
+    }
+
+    // Get student_id from appointments table by sessionId and row number
+    public static String getStudentIdFromAppointment(int sessionId, int rowNumber) {
+        int offset = rowNumber - 1;
+        String sql = "SELECT student_id FROM appointments WHERE session_id = ? LIMIT 1 OFFSET ?";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, sessionId);
+            ps.setInt(2, offset);  // Start from 0
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("student_id");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    //update time slot
+    public static boolean updateTimeSlot(String timeSlot, String studentID) throws SQLException {
+    String sql = "UPDATE appointments SET time = ? WHERE student_id = ?";
+    
+    try (Connection conn = getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setString(1, timeSlot);
+        ps.setString(2, studentID);
+        int affected = ps.executeUpdate();
+        return affected > 0;
+    }
+}
+
+    // Get name from users table by role
+    public static String getUserByRole(String role, int rowNumber) {
+        String sql = "SELECT name FROM users WHERE role = ? LIMIT 1 OFFSET ?";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, role);
+            ps.setInt(2, rowNumber - 1);  // Start from 0
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("name");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    //check each existing row
+   public static boolean checkUserbyRow(int rowNumber) {
+    String sql = "SELECT 1 FROM users LIMIT 1 OFFSET ?";
+
+    try (Connection conn = getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+
+        ps.setInt(1, rowNumber - 1);
+        try (ResultSet rs = ps.executeQuery()) {
+            return rs.next();
+        }
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+
+    return false;
+}
+
+
+    public static User getUserbyID(String id) {
+    String sql = "SELECT id, name, role, password FROM users WHERE id = ?";
+    try (Connection conn = getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+
+        ps.setString(1, id);
+
+        try (ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                String name = rs.getString("name");
+                String role = rs.getString("role");
+                String password = rs.getString("password");
+                return new User(id, name, role, password); // Use 4-parameter constructor
+            }
+        }
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return null;
+}
+
+    // Get name from users table by role
+    public static String getNameByID(String ID) {
+        String sql = "SELECT name FROM users WHERE id = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, ID);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("name");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // Get name from users table by role
+    public static String getIDbyName(String name) {
+        String sql = "SELECT id FROM users WHERE name = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, name);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("id");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+     // Update evaluator and status by appointment_id
+    public static boolean updateAppointment(String studentID, String evaluatorId, String time, String status) throws SQLException {
+        String sql = "UPDATE appointments SET evaluator_id = ?, time = ? , status = ? WHERE student_id = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, evaluatorId);
+            ps.setString(2, time);
+            ps.setString(3, status);
+            ps.setString(4, studentID);
+            int affected = ps.executeUpdate();
+            return affected > 0;
+        }
+    }
+
+    public static boolean updateAppointment(String studentID, int sessionId, String evaluatorId, String time, String status) throws SQLException {
+        String sql = "UPDATE appointments SET evaluator_id = ?, time = ? , status = ? WHERE student_id = ? AND session_id = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, evaluatorId);
+            ps.setString(2, time);
+            ps.setString(3, status);
+            ps.setString(4, studentID);
+            ps.setInt(5, sessionId);
+            int affected = ps.executeUpdate();
+            return affected > 0;
+        }
+    }
+
+    // Get student profile information
+    public static StudentProfileData getStudentProfile(String studentId) {
+        String sql = "SELECT sp.research_title, sp.abstract, sp.supervisor_name, sp.presentation_type, " +
+                     "s.filepath FROM student_profile sp " +
+                     "LEFT JOIN submission s ON sp.student_id = s.student_id " +
+                     "WHERE sp.student_id = ? " +
+                     "ORDER BY s.submission_id DESC LIMIT 1";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, studentId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return new StudentProfileData(
+                        rs.getString("research_title"),
+                        rs.getString("abstract"),
+                        rs.getString("supervisor_name"),
+                        rs.getString("presentation_type"),
+                        rs.getString("filepath")
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // Inner class to hold student profile data
+    public static class StudentProfileData {
+        public final String researchTitle;
+        public final String abstractText;
+        public final String supervisorName;
+        public final String presentationType;
+        public final String filepath;
+
+        public StudentProfileData(String researchTitle, String abstractText, String supervisorName, 
+                                 String presentationType, String filepath) {
+            this.researchTitle = researchTitle;
+            this.abstractText = abstractText;
+            this.supervisorName = supervisorName;
+            this.presentationType = presentationType;
+            this.filepath = filepath;
+        }
+    }
+
+    // Get submission ID for a student
+    public static Integer getSubmissionId(String studentId) {
+        String sql = "SELECT submission_id FROM submission WHERE student_id = ? ORDER BY submission_id DESC LIMIT 1";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, studentId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("submission_id");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // Get latest submission ID for a student within a session
+    public static Integer getSubmissionId(String studentId, int sessionId) {
+        String sql = "SELECT submission_id FROM submission WHERE student_id = ? AND session_id = ? ORDER BY submission_id DESC LIMIT 1";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, studentId);
+            ps.setInt(2, sessionId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("submission_id");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // Get latest session_id for a student's latest submission
+    public static Integer getLatestSubmissionSessionId(String studentId) {
+        String sql = "SELECT session_id FROM submission WHERE student_id = ? ORDER BY submission_id DESC LIMIT 1";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, studentId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    int v = rs.getInt("session_id");
+                    return rs.wasNull() ? null : v;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // Latest active (not finalised) submission for a student
+    public static Integer getActiveSubmissionId(String studentId) {
+        String sql = "SELECT submission_id FROM submission WHERE student_id = ? AND coalesce(status,'') != 'Completed' ORDER BY submission_id DESC LIMIT 1";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, studentId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("submission_id");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // Get appointment time for a student
+    public static String getAppointmentTime(String studentId) {
+        String sql = "SELECT time FROM appointments WHERE student_id = ? LIMIT 1";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, studentId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("time");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return "0";
+    }
+
+    public static String getAppointmentTime(String studentId, int sessionId) {
+        String sql = "SELECT time FROM appointments WHERE student_id = ? AND session_id = ? LIMIT 1";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, studentId);
+            ps.setInt(2, sessionId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("time");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return "0";
+    }
+
+    // Save evaluation to database
+    public static boolean saveEvaluation(String studentId, String evaluatorId, int clarity, 
+                                         int methodology, int results, int presentation, String comments) {
+        Integer submissionId = getSubmissionId(studentId);
+        if (submissionId == null) {
+            System.err.println("No submission found for student: " + studentId);
+            return false;
+        }
+
+        String sql = "INSERT INTO evaluation(submission_id, evaluator_id, clarity_score, " +
+                     "methodology_score, results_score, presentation_score, comments) " +
+                     "VALUES(?, ?, ?, ?, ?, ?, ?)";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, submissionId);
+            ps.setString(2, evaluatorId);
+            ps.setInt(3, clarity);
+            ps.setInt(4, methodology);
+            ps.setInt(5, results);
+            ps.setInt(6, presentation);
+            ps.setString(7, comments);
+            int affected = ps.executeUpdate();
+            
+            // Update appointment status to "Evaluated" so coordinator's Status column is consistent
+            if (affected > 0) {
+                try {
+                    Integer sessionId = getSessionIdForSubmission(submissionId);
+                    if (sessionId != null) {
+                        String existingTime = getAppointmentTime(studentId, sessionId);
+                        updateAppointment(studentId, sessionId, evaluatorId, existingTime, "Evaluated");
+                    }
+                } catch (SQLException e) {
+                    System.err.println("Failed to update appointment status: " + e.getMessage());
+                }
+            }
+            
+            return affected > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // Save evaluation for a specific session (prevents mixing history across sessions)
+    public static boolean saveEvaluation(String studentId, int sessionId, String evaluatorId, int clarity,
+                                         int methodology, int results, int presentation, String comments) {
+        Integer submissionId = getSubmissionId(studentId, sessionId);
+        if (submissionId == null) {
+            System.err.println("No submission found for student=" + studentId + " in session=SEM" + String.format("%03d", sessionId));
+            return false;
+        }
+
+        String sql = "INSERT INTO evaluation(submission_id, evaluator_id, clarity_score, " +
+                     "methodology_score, results_score, presentation_score, comments) " +
+                     "VALUES(?, ?, ?, ?, ?, ?, ?)";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, submissionId);
+            ps.setString(2, evaluatorId);
+            ps.setInt(3, clarity);
+            ps.setInt(4, methodology);
+            ps.setInt(5, results);
+            ps.setInt(6, presentation);
+            ps.setString(7, comments);
+            int affected = ps.executeUpdate();
+
+            if (affected > 0) {
+                System.out.println("Evaluation: saved (student=" + studentId + ", session=SEM" + String.format("%03d", sessionId) + ", evaluator=" + evaluatorId + ")");
+                try {
+                    String existingTime = getAppointmentTime(studentId, sessionId);
+                    updateAppointment(studentId, sessionId, evaluatorId, existingTime, "Evaluated");
+                } catch (SQLException e) {
+                    System.err.println("Failed to update appointment status: " + e.getMessage());
+                }
+            }
+
+            return affected > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private static Integer getSessionIdForSubmission(int submissionId) {
+        String sql = "SELECT session_id FROM submission WHERE submission_id = ? LIMIT 1";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, submissionId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    int v = rs.getInt("session_id");
+                    return rs.wasNull() ? null : v;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // Check if evaluator has evaluated this student
+    public static boolean isStudentEvaluated(String studentId, String evaluatorId) {
+        Integer submissionId = getSubmissionId(studentId);
+        if (submissionId == null) {
+            return false;
+        }
+
+        String sql = "SELECT 1 FROM evaluation WHERE submission_id = ? AND evaluator_id = ? LIMIT 1";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, submissionId);
+            ps.setString(2, evaluatorId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public static boolean isStudentEvaluated(String studentId, int sessionId, String evaluatorId) {
+        Integer submissionId = getSubmissionId(studentId, sessionId);
+        if (submissionId == null) {
+            return false;
+        }
+        return isSubmissionEvaluatedByEvaluator(submissionId, evaluatorId);
+    }
+
+    // Check if student has been evaluated by any evaluator
+    public static boolean isStudentEvaluatedByAny(String studentId) {
+        Integer submissionId = getSubmissionId(studentId);
+        if (submissionId == null) {
+            return false;
+        }
+
+        String sql = "SELECT 1 FROM evaluation WHERE submission_id = ? LIMIT 1";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, submissionId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public static boolean isStudentEvaluatedByAny(String studentId, int sessionId) {
+        Integer submissionId = getSubmissionId(studentId, sessionId);
+        if (submissionId == null) {
+            return false;
+        }
+        return isSubmissionEvaluatedByAny(submissionId);
+    }
+
+    private static boolean isSubmissionEvaluatedByAny(int submissionId) {
+        String sql = "SELECT 1 FROM evaluation WHERE submission_id = ? LIMIT 1";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, submissionId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    private static boolean isSubmissionEvaluatedByEvaluator(int submissionId, String evaluatorId) {
+        String sql = "SELECT 1 FROM evaluation WHERE submission_id = ? AND evaluator_id = ? LIMIT 1";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, submissionId);
+            ps.setString(2, evaluatorId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    // Get all evaluations for a student
+    public static List<EvaluationData> getAllEvaluationsForStudent(String studentId) {
+        Integer submissionId = getSubmissionId(studentId);
+        return getAllEvaluationsForSubmission(submissionId);
+    }
+
+    public static List<EvaluationData> getAllEvaluationsForStudent(String studentId, int sessionId) {
+        Integer submissionId = getSubmissionId(studentId, sessionId);
+        return getAllEvaluationsForSubmission(submissionId);
+    }
+
+    private static List<EvaluationData> getAllEvaluationsForSubmission(Integer submissionId) {
+        List<EvaluationData> evaluations = new ArrayList<>();
+        if (submissionId == null) {
+            return evaluations;
+        }
+
+        String sql = "SELECT clarity_score, methodology_score, results_score, presentation_score, comments " +
+                     "FROM evaluation WHERE submission_id = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, submissionId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    evaluations.add(new EvaluationData(
+                        rs.getInt("clarity_score"),
+                        rs.getInt("methodology_score"),
+                        rs.getInt("results_score"),
+                        rs.getInt("presentation_score"),
+                        rs.getString("comments")
+                    ));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return evaluations;
+    }
+
+    // Inner class to hold evaluation data
+    public static class EvaluationData {
+        public final int clarityScore;
+        public final int methodologyScore;
+        public final int resultsScore;
+        public final int presentationScore;
+        public final String comments;
+
+        public EvaluationData(int clarityScore, int methodologyScore, int resultsScore, 
+                              int presentationScore, String comments) {
+            this.clarityScore = clarityScore;
+            this.methodologyScore = methodologyScore;
+            this.resultsScore = resultsScore;
+            this.presentationScore = presentationScore;
+            this.comments = comments;
+        }
+
+        public int getTotalScore() {
+            return clarityScore + methodologyScore + resultsScore + presentationScore;
+        }
+    }
+
+    // Get all student IDs in a session
+    public static List<String> getStudentsInSession(int sessionId) {
+        List<String> studentIds = new ArrayList<>();
+        String sql = "SELECT student_id FROM appointments WHERE session_id = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, sessionId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    studentIds.add(rs.getString("student_id"));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return studentIds;
+    }
+
+    // Check if all students in a session have been evaluated
+    public static boolean areAllStudentsEvaluated(int sessionId) {
+        List<String> studentIds = getStudentsInSession(sessionId);
+        if (studentIds.isEmpty()) {
+            return false;
+        }
+
+        for (String studentId : studentIds) {
+            Integer submissionId = resolveSubmissionIdForSession(studentId, sessionId);
+            if (submissionId == null || !isSubmissionEvaluatedByAny(submissionId)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // Calculate average total score for a student
+    public static double getAverageTotalScore(String studentId) {
+        List<EvaluationData> evaluations = getAllEvaluationsForStudent(studentId);
+        if (evaluations.isEmpty()) {
+            return 0.0;
+        }
+
+        int totalSum = 0;
+        for (EvaluationData eval : evaluations) {
+            totalSum += eval.getTotalScore();
+        }
+        return (double) totalSum / evaluations.size();
+    }
+
+    // Calculate average presentation score for a student
+    public static double getAveragePresentationScore(String studentId) {
+        List<EvaluationData> evaluations = getAllEvaluationsForStudent(studentId);
+        if (evaluations.isEmpty()) {
+            return 0.0;
+        }
+
+        int totalSum = 0;
+        for (EvaluationData eval : evaluations) {
+            totalSum += eval.presentationScore;
+        }
+        return (double) totalSum / evaluations.size();
+    }
+
+    // Calculate and save awards for a session
+    public static void calculateAndSaveAwards(int sessionId) {
+        List<String> studentIds = getStudentsInSession(sessionId);
+        if (studentIds.isEmpty()) {
+            return;
+        }
+
+        // Clear existing awards for this session
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement("DELETE FROM award WHERE session_id = ?")) {
+            ps.setInt(1, sessionId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        // Collect student data with scores
+        List<StudentScoreData> studentScores = new ArrayList<>();
+        for (String studentId : studentIds) {
+            StudentProfileData profile = getStudentProfile(studentId);
+            if (profile != null) {
+                Integer submissionId = resolveSubmissionIdForSession(studentId, sessionId);
+                double avgTotal = getAverageTotalScoreForSubmission(submissionId);
+                double avgPresentation = getAveragePresentationScoreForSubmission(submissionId);
+                studentScores.add(new StudentScoreData(studentId, profile.presentationType, avgTotal, avgPresentation));
+            }
+        }
+
+        // Calculate Best Oral
+        String bestOralId = null;
+        double bestOralScore = -1;
+        for (StudentScoreData data : studentScores) {
+            if (!"Oral".equalsIgnoreCase(data.presentationType)) continue;
+            if (data.avgTotalScore > bestOralScore ||
+                (data.avgTotalScore == bestOralScore && bestOralId != null && data.studentId.compareTo(bestOralId) < 0)) {
+                bestOralScore = data.avgTotalScore;
+                bestOralId = data.studentId;
+            } else if (bestOralId == null && data.avgTotalScore >= 0) {
+                bestOralScore = data.avgTotalScore;
+                bestOralId = data.studentId;
+            }
+        }
+
+        // Calculate Best Poster
+        String bestPosterId = null;
+        double bestPosterScore = -1;
+        for (StudentScoreData data : studentScores) {
+            if (!"Poster".equalsIgnoreCase(data.presentationType)) continue;
+            if (data.avgTotalScore > bestPosterScore ||
+                (data.avgTotalScore == bestPosterScore && bestPosterId != null && data.studentId.compareTo(bestPosterId) < 0)) {
+                bestPosterScore = data.avgTotalScore;
+                bestPosterId = data.studentId;
+            } else if (bestPosterId == null && data.avgTotalScore >= 0) {
+                bestPosterScore = data.avgTotalScore;
+                bestPosterId = data.studentId;
+            }
+        }
+
+        // Calculate People's Choice (highest presentation score overall)
+        String peopleChoiceId = null;
+        double peopleChoiceScore = -1;
+        for (StudentScoreData data : studentScores) {
+            if (data.avgPresentationScore > peopleChoiceScore ||
+                (data.avgPresentationScore == peopleChoiceScore && peopleChoiceId != null && data.studentId.compareTo(peopleChoiceId) < 0)) {
+                peopleChoiceScore = data.avgPresentationScore;
+                peopleChoiceId = data.studentId;
+            } else if (peopleChoiceId == null && data.avgPresentationScore >= 0) {
+                peopleChoiceScore = data.avgPresentationScore;
+                peopleChoiceId = data.studentId;
+            }
+        }
+
+        // Save awards
+        try (Connection conn = getConnection()) {
+            String insertSql = "INSERT INTO award(student_id, session_id, submission_id, award_type, score) VALUES(?, ?, ?, ?, ?)";
+            try (PreparedStatement ps = conn.prepareStatement(insertSql)) {
+                if (bestOralId != null) {
+                    ps.setString(1, bestOralId);
+                    ps.setInt(2, sessionId);
+                    ps.setObject(3, resolveSubmissionIdForSession(bestOralId, sessionId));
+                    ps.setString(4, "Best Oral");
+                    ps.setDouble(5, bestOralScore);
+                    ps.executeUpdate();
+                }
+
+                if (bestPosterId != null) {
+                    ps.setString(1, bestPosterId);
+                    ps.setInt(2, sessionId);
+                    ps.setObject(3, resolveSubmissionIdForSession(bestPosterId, sessionId));
+                    ps.setString(4, "Best Poster");
+                    ps.setDouble(5, bestPosterScore);
+                    ps.executeUpdate();
+                }
+
+                if (peopleChoiceId != null) {
+                    ps.setString(1, peopleChoiceId);
+                    ps.setInt(2, sessionId);
+                    ps.setObject(3, resolveSubmissionIdForSession(peopleChoiceId, sessionId));
+                    ps.setString(4, "People's Choice");
+                    ps.setDouble(5, peopleChoiceScore);
+                    ps.executeUpdate();
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        System.out.println("Awards: computed for session=SEM" + String.format("%03d", sessionId));
+    }
+
+    private static double getAverageTotalScoreForSubmission(Integer submissionId) {
+        List<EvaluationData> evaluations = getAllEvaluationsForSubmission(submissionId);
+        if (evaluations.isEmpty()) return 0.0;
+        int total = 0;
+        for (EvaluationData e : evaluations) total += e.getTotalScore();
+        return (double) total / evaluations.size();
+    }
+
+    private static double getAveragePresentationScoreForSubmission(Integer submissionId) {
+        List<EvaluationData> evaluations = getAllEvaluationsForSubmission(submissionId);
+        if (evaluations.isEmpty()) return 0.0;
+        int total = 0;
+        for (EvaluationData e : evaluations) total += e.presentationScore;
+        return (double) total / evaluations.size();
+    }
+
+    // Coordinator action: publish awards + unlock results for a session
+    public static boolean finaliseSessionReport(int sessionId) {
+        System.out.println("FinaliseReport: session=SEM" + String.format("%03d", sessionId) + " started");
+        // Resolve + validate presenter submissions for this session
+        List<String> studentIds = getStudentsInSession(sessionId);
+        for (String studentId : studentIds) {
+            Integer submissionId = resolveSubmissionIdForSession(studentId, sessionId);
+            if (submissionId == null || !isSubmissionEvaluatedByAny(submissionId)) {
+                System.out.println("FinaliseReport: blocked (missing evaluation) session=SEM" +
+                    String.format("%03d", sessionId) + ", student=" + studentId);
+                return false;
+            }
+        }
+
+        calculateAndSaveAwards(sessionId);
+
+        // Mark only the resolved submissions as Completed, and normalize their session_id
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(
+                 "UPDATE submission SET status = 'Completed', session_id = ? WHERE submission_id = ?"
+             )) {
+            for (String studentId : studentIds) {
+                Integer submissionId = resolveSubmissionIdForSession(studentId, sessionId);
+                if (submissionId == null) continue;
+                ps.setInt(1, sessionId);
+                ps.setInt(2, submissionId);
+                ps.executeUpdate();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        System.out.println("FinaliseReport: session=SEM" + String.format("%03d", sessionId) + " completed (awards published, results unlocked)");
+        return true;
+    }
+
+    /**
+     * Resolve which submission should be treated as the presenter's submission for a given session.
+     * This handles legacy / inconsistent data where submission.session_id may not match appointments.session_id.
+     */
+    private static Integer resolveSubmissionIdForSession(String studentId, int sessionId) {
+        // First, try the proper session-scoped submission
+        Integer bySession = getSubmissionId(studentId, sessionId);
+        if (bySession != null) {
+            return bySession;
+        }
+
+        // Next, try the latest evaluated submission (likely the one the evaluator actually scored)
+        String evaluatedSql =
+            "SELECT s.submission_id " +
+            "FROM submission s " +
+            "WHERE s.student_id = ? AND EXISTS (" +
+            "  SELECT 1 FROM evaluation e WHERE e.submission_id = s.submission_id" +
+            ") " +
+            "ORDER BY s.submission_id DESC LIMIT 1";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(evaluatedSql)) {
+            ps.setString(1, studentId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("submission_id");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // Fallback: latest submission (better than hard-failing)
+        return getSubmissionId(studentId);
+    }
+
+    // Inner class to hold student score data
+    private static class StudentScoreData {
+        final String studentId;
+        final String presentationType;
+        final double avgTotalScore;
+        final double avgPresentationScore;
+
+        StudentScoreData(String studentId, String presentationType, double avgTotalScore, double avgPresentationScore) {
+            this.studentId = studentId;
+            this.presentationType = presentationType;
+            this.avgTotalScore = avgTotalScore;
+            this.avgPresentationScore = avgPresentationScore;
+        }
+    }
+
+    // Inner class to hold student evaluation results
+    public static class StudentEvaluationResults {
+        public final int avgClarityScore;
+        public final int avgMethodologyScore;
+        public final int avgResultsScore;
+        public final int avgPresentationScore;
+        public final String comments;
+        public final String award;
+
+        public StudentEvaluationResults(int avgClarityScore, int avgMethodologyScore, int avgResultsScore,
+                                       int avgPresentationScore, String comments, String award) {
+            this.avgClarityScore = avgClarityScore;
+            this.avgMethodologyScore = avgMethodologyScore;
+            this.avgResultsScore = avgResultsScore;
+            this.avgPresentationScore = avgPresentationScore;
+            this.comments = comments;
+            this.award = award;
+        }
+    }
+
+    // Get student evaluation results (averaged scores, comments, award)
+    public static StudentEvaluationResults getStudentEvaluationResults(String studentId) {
+        List<EvaluationData> evaluations = getAllEvaluationsForStudent(studentId);
+        if (evaluations.isEmpty()) {
+            return null;
+        }
+
+        // Calculate averages
+        double avgClarity = 0, avgMethodology = 0, avgResults = 0, avgPresentation = 0;
+        List<String> commentsList = new ArrayList<>();
+        
+        for (EvaluationData eval : evaluations) {
+            avgClarity += eval.clarityScore;
+            avgMethodology += eval.methodologyScore;
+            avgResults += eval.resultsScore;
+            avgPresentation += eval.presentationScore;
+            if (eval.comments != null && !eval.comments.trim().isEmpty()) {
+                commentsList.add(eval.comments.trim());
+            }
+        }
+
+        int count = evaluations.size();
+        avgClarity /= count;
+        avgMethodology /= count;
+        avgResults /= count;
+        avgPresentation /= count;
+
+        String combinedComments = String.join("\n\n", commentsList);
+        String award = getStudentAwardResult(studentId);
+        if (award == null || award.trim().isEmpty()) {
+            award = "No award";
+        }
+
+        return new StudentEvaluationResults(
+            (int) Math.round(avgClarity),
+            (int) Math.round(avgMethodology),
+            (int) Math.round(avgResults),
+            (int) Math.round(avgPresentation),
+            combinedComments,
+            award
+        );
+    }
+
+    public static StudentEvaluationResults getStudentEvaluationResults(String studentId, int sessionId) {
+        List<EvaluationData> evaluations = getAllEvaluationsForStudent(studentId, sessionId);
+        if (evaluations.isEmpty()) {
+            return null;
+        }
+
+        double avgClarity = 0, avgMethodology = 0, avgResults = 0, avgPresentation = 0;
+        List<String> commentsList = new ArrayList<>();
+
+        for (EvaluationData eval : evaluations) {
+            avgClarity += eval.clarityScore;
+            avgMethodology += eval.methodologyScore;
+            avgResults += eval.resultsScore;
+            avgPresentation += eval.presentationScore;
+            if (eval.comments != null && !eval.comments.trim().isEmpty()) {
+                commentsList.add(eval.comments.trim());
+            }
+        }
+
+        int count = evaluations.size();
+        avgClarity /= count;
+        avgMethodology /= count;
+        avgResults /= count;
+        avgPresentation /= count;
+
+        String combinedComments = String.join("\n\n", commentsList);
+        String award = getStudentAwardResult(studentId, sessionId);
+        if (award == null || award.trim().isEmpty()) {
+            award = "No award";
+        }
+
+        return new StudentEvaluationResults(
+            (int) Math.round(avgClarity),
+            (int) Math.round(avgMethodology),
+            (int) Math.round(avgResults),
+            (int) Math.round(avgPresentation),
+            combinedComments,
+            award
+        );
+    }
+
+    // Get latest evaluation for a student (latest submission)
+    public static Evaluation getEvaluationByStudentId(String studentId) {
+        Integer submissionId = getSubmissionId(studentId);
+        if (submissionId == null) {
+            return null;
+        }
+
+        String sql = "SELECT clarity_score, methodology_score, results_score, presentation_score, comments " +
+                     "FROM evaluation WHERE submission_id = ? ORDER BY evaluation_id DESC LIMIT 1";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, submissionId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return new Evaluation(
+                        rs.getInt("clarity_score"),
+                        rs.getInt("methodology_score"),
+                        rs.getInt("results_score"),
+                        rs.getInt("presentation_score"),
+                        rs.getString("comments")
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // Get latest evaluation for a student in a specific session
+    public static Evaluation getEvaluationByStudentId(String studentId, int sessionId) {
+        Integer submissionId = getSubmissionId(studentId, sessionId);
+        if (submissionId == null) {
+            return null;
+        }
+
+        String sql = "SELECT clarity_score, methodology_score, results_score, presentation_score, comments " +
+                     "FROM evaluation WHERE submission_id = ? ORDER BY evaluation_id DESC LIMIT 1";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, submissionId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return new Evaluation(
+                        rs.getInt("clarity_score"),
+                        rs.getInt("methodology_score"),
+                        rs.getInt("results_score"),
+                        rs.getInt("presentation_score"),
+                        rs.getString("comments")
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    
+}
+>>>>>>> Stashed changes

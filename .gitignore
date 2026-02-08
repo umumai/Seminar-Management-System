@@ -1,0 +1,6 @@
+## Java build artifacts
+*.class
+
+
+
+## buang all class file
