@@ -9,8 +9,7 @@ public class ReportFrame extends JPanel {
     private final JLabel reportLabel = new JLabel("Student report");
     private final JLabel studentNameLabel;
     private final JLabel evaluatorNameLabel;
-    private final JLabel presentationTypeLabel;
-    private final JLabel sessionLabel;
+    private final JLabel studentIDLabel;
     private final JLabel clarityLabel;
     private final JLabel methodologyLabel;
     private final JLabel resultsLabel;
@@ -19,6 +18,7 @@ public class ReportFrame extends JPanel {
 
     private User currentStud;
     private Evaluation scores;
+    private Appointment appt;
     public ReportFrame(JFrame frame) {
         this.frame = frame;
         setLayout(new BorderLayout());
@@ -46,17 +46,14 @@ public class ReportFrame extends JPanel {
         studentNameLabel = new JLabel("-");
         infoPanel.add(studentNameLabel);
 
+        infoPanel.add(new JLabel("Student ID :"));
+        studentIDLabel = new JLabel("-");
+        infoPanel.add(studentIDLabel);
+
         infoPanel.add(new JLabel("Evaluator Name:"));
         evaluatorNameLabel = new JLabel("-");
         infoPanel.add(evaluatorNameLabel);
 
-        infoPanel.add(new JLabel("Presentation Type:"));
-        presentationTypeLabel = new JLabel("-");
-        infoPanel.add(presentationTypeLabel);
-
-        infoPanel.add(new JLabel("Session:"));
-        sessionLabel = new JLabel("-");
-        infoPanel.add(sessionLabel);
 
         // ===== Scores Panel =====
         JPanel scorePanel = new JPanel(new GridLayout(4, 2, 10, 8));
@@ -105,11 +102,11 @@ public class ReportFrame extends JPanel {
         String ID = studentId == null ? "" : studentId;
         currentStud = DBHelper.getUserbyID(ID);
         scores = DBHelper.getEvaluationByStudentId(ID);
+        appt = DBHelper.getAppointmentByStudentId(ID);
         reportLabel.setText("Student " + currentStud.getId() + " report");
         studentNameLabel.setText(currentStud.getName());
-        // evaluatorNameLabel.setText();
-        //presentationTypeLabel.setText();
-        //sessionLabel.setText(sessionName);
+        evaluatorNameLabel.setText(DBHelper.getNameByID(appt.getEvaluatorID()));
+        studentIDLabel.setText(ID);
 
         clarityLabel.setText(String.valueOf(scores.getClarityScore()));
         methodologyLabel.setText(String.valueOf(scores.getMethodologyScore()));
