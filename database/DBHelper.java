@@ -1091,5 +1091,34 @@ public class DBHelper {
         );
     }
 
+    // Get latest evaluation for a student (latest submission)
+    public static Evaluation getEvaluationByStudentId(String studentId) {
+        Integer submissionId = getSubmissionId(studentId);
+        if (submissionId == null) {
+            return null;
+        }
+
+        String sql = "SELECT clarity_score, methodology_score, results_score, presentation_score, comments " +
+                     "FROM evaluation WHERE submission_id = ? ORDER BY evaluation_id DESC LIMIT 1";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, submissionId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return new Evaluation(
+                        rs.getInt("clarity_score"),
+                        rs.getInt("methodology_score"),
+                        rs.getInt("results_score"),
+                        rs.getInt("presentation_score"),
+                        rs.getString("comments")
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     
 }

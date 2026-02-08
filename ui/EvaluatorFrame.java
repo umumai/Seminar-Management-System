@@ -141,7 +141,7 @@ public class EvaluatorFrame extends JPanel {
                 String studentId = appt.getStudentID();
                 boolean isAssignedToMe = appt.getEvaluatorID() == null ? 
                     currentUser.getId() == null : appt.getEvaluatorID().equals(currentUser.getId());
-                // Green highlight should represent THIS evaluator's evaluated work (not other evaluators').
+                // green highlight = evaluated (that evaluator only)
                 boolean isEvaluated = isAssignedToMe && currentUser != null &&
                     DBHelper.isStudentEvaluated(studentId, currentUser.getId());
                 

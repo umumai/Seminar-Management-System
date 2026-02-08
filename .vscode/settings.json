@@ -4,7 +4,7 @@
     ],
     "java.project.referencedLibraries": [ // change according to your OS
         // "Database\\Lib\\sqlite-jdbc-3.51.1.0.jar" (Windows)
-        "Database/Lib/sqlite-jdbc-3.51.1.0.jar" // (Linux) / macOS / Other
+        "Database/lib/sqlite-jdbc-3.51.1.0.jar" // (Linux) / macOS / Other
 
     ]
 }
