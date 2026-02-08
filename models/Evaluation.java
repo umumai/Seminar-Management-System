@@ -13,8 +13,29 @@ public class Evaluation {
         this.presentationScore = p;
         this.comments = comments;
     }
-
+    
     public int calculateTotalScore(){
         return clarityScore + resultsScore + presentationScore;
     }
+    //getters
+    public int getClarityScore() {
+        return clarityScore;
+    }
+
+    public int getMethodologyScore() {
+        return methodologyScore;
+    }
+
+    public int getResultsScore() {
+        return resultsScore;
+    }
+
+    public int getPresentationScore() {
+        return presentationScore;
+    }
+
+    public String getComments() {
+        return comments;
+    }
+
 }

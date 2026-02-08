@@ -104,13 +104,15 @@ public class AppointmentFrame extends JPanel {
         JButton R1C3 = box("Evaluator Name", deepBlue, Color.white);
         JButton R1C4 = box("Time", deepBlue, Color.white);
         JButton R1C5 = box("Status", deepBlue, Color.white);
+        JButton R1C6 = box("Report", deepBlue, Color.white);
 
         //1st student
         JButton R2C1 = box("", deepBlue, Color.white);
-        JButton R2C2 = studentBox("");
-        JButton R2C3 = studentBox("");
-        JButton R2C4 = statusBox("", Color.white, deepBlue);
-        JButton R2C5 = studentBox("");
+        JButton R2C2 = Box("");
+        JButton R2C3 = Box("");
+        JButton R2C4 = Box("");
+        JButton R2C5 = Box("");
+        JButton R2C6 = Box("");
         if (apptList.size() > 0 && apptList.get(0) != null){
             Appointment currentAppt = apptList.get(0);
             R2C1.setText(currentAppt.getStudentID());
@@ -139,15 +141,20 @@ public class AppointmentFrame extends JPanel {
             } else {
                 R2C4.setText(currentAppt.getTimeSlot()+":00");
             }
-            
             R2C5.setText(currentAppt.getStatus());
+            R2C6.setText("Unavailable");
+            if ("Evaluated".equalsIgnoreCase(currentAppt.getStatus())) {
+                R2C6.setText("View Report");
+                R2C6.addActionListener(e -> ((LoginFrame) frame).showReportPanel(currentAppt.getStudentID()));
+            }
         }
 
         JButton R3C1 = box("", deepBlue, Color.white);
-        JButton R3C2 = studentBox("");
-        JButton R3C3 = studentBox("");
-        JButton R3C4 = statusBox("", Color.white, deepBlue);
-        JButton R3C5 = studentBox("");
+        JButton R3C2 = Box("");
+        JButton R3C3 = Box("");
+        JButton R3C4 = Box("");
+        JButton R3C5 = Box("");
+        JButton R3C6 = Box("");
         if (apptList.size() > 1 && apptList.get(1) != null){
             Appointment currentAppt = apptList.get(1);
             R3C1.setText(currentAppt.getStudentID());
@@ -176,13 +183,19 @@ public class AppointmentFrame extends JPanel {
                 R3C4.setText(currentAppt.getTimeSlot()+":00");
             }
             R3C5.setText(currentAppt.getStatus());
+            R3C6.setText("Unavailable");
+            if ("Evaluated".equalsIgnoreCase(currentAppt.getStatus())) {
+                R3C6.setText("View Report");
+                R3C6.addActionListener(e -> ((LoginFrame) frame).showReportPanel(currentAppt.getStudentID()));
+            }
         }
 
         JButton R4C1 = box("", deepBlue, Color.white);
-        JButton R4C2 = studentBox("");
-        JButton R4C3 = studentBox("");
-        JButton R4C4 = statusBox("", Color.white, deepBlue);
-        JButton R4C5 = studentBox("");
+        JButton R4C2 = Box("");
+        JButton R4C3 = Box("");
+        JButton R4C4 = Box("");
+        JButton R4C5 = Box("");
+        JButton R4C6 = Box("");
         if (apptList.size() > 2 && apptList.get(2) != null){
             Appointment currentAppt = apptList.get(2);
             R4C1.setText(currentAppt.getStudentID());
@@ -211,14 +224,20 @@ public class AppointmentFrame extends JPanel {
                 R4C4.setText(currentAppt.getTimeSlot()+":00");
             }
             R4C5.setText(currentAppt.getStatus());
+            R4C6.setText("Unavailable");
+            if ("Evaluated".equalsIgnoreCase(currentAppt.getStatus())) {
+                R4C6.setText("View Report");
+                R4C6.addActionListener(e -> ((LoginFrame) frame).showReportPanel(currentAppt.getStudentID()));
+            }
         }
 
         //12:00PM row
         JButton R5C1 = box("", deepBlue, Color.white);
-        JButton R5C2 = studentBox("");
-        JButton R5C3 = studentBox("");
-        JButton R5C4 = statusBox("", Color.white, deepBlue);
-        JButton R5C5 = studentBox("");
+        JButton R5C2 = Box("");
+        JButton R5C3 = Box("");
+        JButton R5C4 = Box("");
+        JButton R5C5 = Box("");
+        JButton R5C6 = Box("");
         if (apptList.size() > 3 && apptList.get(3) != null){
             Appointment currentAppt = apptList.get(3);
             R5C1.setText(currentAppt.getStudentID());
@@ -247,14 +266,20 @@ public class AppointmentFrame extends JPanel {
                 R5C4.setText(currentAppt.getTimeSlot()+":00");
             }
             R5C5.setText(currentAppt.getStatus());
+            R5C6.setText("Unavailable");
+            if ("Evaluated".equalsIgnoreCase(currentAppt.getStatus())) {
+                R5C6.setText("View Report");
+                R5C6.addActionListener(e -> ((LoginFrame) frame).showReportPanel(currentAppt.getStudentID()));
+            }
         }
 
         //1:00PM row
         JButton R6C1 = box("", deepBlue, Color.white);
-        JButton R6C2 = studentBox("");
-        JButton R6C3 = studentBox("");
-        JButton R6C4 = statusBox("", Color.white, deepBlue);
-        JButton R6C5 = studentBox("");
+        JButton R6C2 = Box("");
+        JButton R6C3 = Box("");
+        JButton R6C4 = Box("");
+        JButton R6C5 = Box("");
+        JButton R6C6 = Box("");
         if (apptList.size() > 4 && apptList.get(4) != null){
             Appointment currentAppt = apptList.get(4);
             R6C1.setText(currentAppt.getStudentID());
@@ -283,14 +308,20 @@ public class AppointmentFrame extends JPanel {
                 R6C4.setText(currentAppt.getTimeSlot()+":00");
             }
             R6C5.setText(currentAppt.getStatus());
+            R6C6.setText("Unavailable");
+            if ("Evaluated".equalsIgnoreCase(currentAppt.getStatus())) {
+                R6C6.setText("View Report");
+                R6C6.addActionListener(e -> ((LoginFrame) frame).showReportPanel(currentAppt.getStudentID()));
+            }
         }
 
         //2:00PM row
         JButton R7C1 = box("", deepBlue, Color.white);
-        JButton R7C2 = studentBox("");
-        JButton R7C3 = studentBox("");
-        JButton R7C4 = statusBox("", Color.white, deepBlue);
-        JButton R7C5 = studentBox("");
+        JButton R7C2 = Box("");
+        JButton R7C3 = Box("");
+        JButton R7C4 = Box("");
+        JButton R7C5 = Box("");
+        JButton R7C6 = Box("");
         if (apptList.size() > 5 && apptList.get(5) != null){
             Appointment currentAppt = apptList.get(5);
             R7C1.setText(currentAppt.getStudentID());
@@ -319,14 +350,20 @@ public class AppointmentFrame extends JPanel {
                 R7C4.setText(currentAppt.getTimeSlot()+":00");
             }
             R7C5.setText(currentAppt.getStatus());
+            R7C6.setText("Unavailable");
+            if ("Evaluated".equalsIgnoreCase(currentAppt.getStatus())) {
+                R7C6.setText("View Report");
+                R7C6.addActionListener(e -> ((LoginFrame) frame).showReportPanel(currentAppt.getStudentID()));
+            }
         }
 
         //3:00PM row
         JButton R8C1 = box("", deepBlue, Color.white);
-        JButton R8C2 = studentBox("");
-        JButton R8C3 = studentBox("");
-        JButton R8C4 = statusBox("", Color.white, deepBlue);
-        JButton R8C5 = studentBox("");
+        JButton R8C2 = Box("");
+        JButton R8C3 = Box("");
+        JButton R8C4 = Box("");
+        JButton R8C5 = Box("");
+        JButton R8C6 = Box("");
         if (apptList.size() > 6 && apptList.get(6) != null){
             Appointment currentAppt = apptList.get(6);
             R8C1.setText(currentAppt.getStudentID());
@@ -355,14 +392,20 @@ public class AppointmentFrame extends JPanel {
                 R8C4.setText(currentAppt.getTimeSlot()+":00");
             }
             R8C5.setText(currentAppt.getStatus());
+            R8C6.setText("Unavailable");
+            if ("Evaluated".equalsIgnoreCase(currentAppt.getStatus())) {
+                R8C6.setText("View Report");
+                R8C6.addActionListener(e -> ((LoginFrame) frame).showReportPanel(currentAppt.getStudentID()));
+            }
         }
 
         //4:00PM row
         JButton R9C1 = box("", deepBlue, Color.white);
-        JButton R9C2 = studentBox("");
-        JButton R9C3 = studentBox("");
-        JButton R9C4 = statusBox("", Color.white, deepBlue);
-        JButton R9C5 = studentBox("");
+        JButton R9C2 = Box("");
+        JButton R9C3 = Box("");
+        JButton R9C4 = Box("");
+        JButton R9C5 = Box("");
+        JButton R9C6 = Box("");
         if (apptList.size() > 7 && apptList.get(7) != null){
             Appointment currentAppt = apptList.get(7);
             R9C1.setText(currentAppt.getStudentID());
@@ -391,6 +434,11 @@ public class AppointmentFrame extends JPanel {
                 R9C4.setText(currentAppt.getTimeSlot()+":00");
             }
             R9C5.setText(currentAppt.getStatus());
+            R9C6.setText("Unavailable");
+            if ("Evaluated".equalsIgnoreCase(currentAppt.getStatus())) {
+                R9C6.setText("View Report");
+                R9C6.addActionListener(e -> ((LoginFrame) frame).showReportPanel(currentAppt.getStudentID()));
+            }
         }
 
 
@@ -402,54 +450,63 @@ public class AppointmentFrame extends JPanel {
         tablePanel.add(R1C3);
         tablePanel.add(R1C4);
         tablePanel.add(R1C5);
+        tablePanel.add(R1C6);
 
         tablePanel.add(R2C1);
         tablePanel.add(R2C2);
         tablePanel.add(R2C3);
         tablePanel.add(R2C4);
         tablePanel.add(R2C5);
+        tablePanel.add(R2C6);
 
         tablePanel.add(R3C1);
         tablePanel.add(R3C2);
         tablePanel.add(R3C3);
         tablePanel.add(R3C4);
         tablePanel.add(R3C5);
+        tablePanel.add(R3C6);
 
         tablePanel.add(R4C1);
         tablePanel.add(R4C2);
         tablePanel.add(R4C3);
         tablePanel.add(R4C4);
         tablePanel.add(R4C5);
+        tablePanel.add(R4C6);
 
         tablePanel.add(R5C1);
         tablePanel.add(R5C2);
         tablePanel.add(R5C3);
         tablePanel.add(R5C4);
         tablePanel.add(R5C5);
+        tablePanel.add(R5C6);
 
         tablePanel.add(R6C1);
         tablePanel.add(R6C2);
         tablePanel.add(R6C3);
         tablePanel.add(R6C4);
         tablePanel.add(R6C5);
+        tablePanel.add(R6C6);
 
         tablePanel.add(R7C1);
         tablePanel.add(R7C2);
         tablePanel.add(R7C3);
         tablePanel.add(R7C4);
         tablePanel.add(R7C5);
+        tablePanel.add(R7C6);
 
         tablePanel.add(R8C1);
         tablePanel.add(R8C2);
         tablePanel.add(R8C3);
         tablePanel.add(R8C4);
         tablePanel.add(R8C5);
+        tablePanel.add(R8C6);
 
         tablePanel.add(R9C1);
         tablePanel.add(R9C2);
         tablePanel.add(R9C3);
         tablePanel.add(R9C4);
         tablePanel.add(R9C5);
+        tablePanel.add(R9C6);
 
         JButton saveButton = buttonEdit();
         JLabel instruction = new JLabel("Click edit to assign evaluator & time.");
@@ -471,7 +528,7 @@ public class AppointmentFrame extends JPanel {
         bottomPanel.add(rightButtonsPanel, BorderLayout.EAST);
         mainPanel.add(bottomPanel, BorderLayout.SOUTH);
         } else {
-            JLabel text = new JLabel("Information unavailable as student not registered to this seminar yet.", SwingConstants.CENTER);
+            JLabel text = new JLabel("Information  as student not registered to this seminar yet.", SwingConstants.CENTER);
             tablePanel.add(text);
         }
 
@@ -626,7 +683,7 @@ public class AppointmentFrame extends JPanel {
         return btn;
     }
 
-    public JButton studentBox(String text){
+    public JButton Box(String text){
         JButton btn = new JButton(text);
         btn.setBackground(Color.white);
         btn.setForeground(deepBlue);
@@ -647,27 +704,6 @@ public class AppointmentFrame extends JPanel {
     //     });
     //     return btn;
     // }
-
-    // String status = "view Report";
-    public JButton statusBox(String text, Color bgColor, Color textColor){
-        JButton btn = new JButton(text);
-        btn.setBackground(bgColor);
-        btn.setForeground(textColor);
-        btn.setFocusPainted(false);
-        // btn.setBorderPainted(true);
-        // btn.addActionListener(e -> {
-        //     if("view Report".equals(status)) {
-        //         ((LoginFrame) frame).showPanel("reportFrame");
-        //         btn.setText("view Report");
-        //     }
-                // } else {
-            //     //status = "view Report";
-            //     btn.setText("generate Report");
-            // } 
-
-        // });
-        return btn;
-    }
 
     public JButton buttonEdit(){
         JButton btn = new JButton("edit");
